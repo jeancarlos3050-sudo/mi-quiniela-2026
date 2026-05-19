@@ -4,136 +4,54 @@ import json
 # Configuración de la página
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# Estilos CSS
+# Estilos CSS para el modo oscuro
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    .partido-box {background-color: #1c2541; padding: 10px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #3a506b;}
-    div[data-testid="stNumberInput"] {width: 60px !important;}
-    h2 {color: #ffbc42 !important;}
+    h1 {color: #ffbc42 !important; text-align: center;}
+    .stButton>button {width: 100%; background-color: #2a9d8f; color: white; font-weight: bold;}
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre Completo del Participante:")
+nombre = st.text_input("Nombre Completo del Participante")
 
+# Función con los 72 partidos
 def obtener_calendario():
     return {
-        "GRUPO A": [
-            {"#": "01", "hora": "11/06 13:00", "local": "México", "visitante": "Sudáfrica"},
-            {"#": "02", "hora": "11/06 20:00", "local": "Corea del Sur", "visitante": "Chequia"},
-            {"#": "03", "hora": "18/06 19:00", "local": "México", "visitante": "Corea del Sur"},
-            {"#": "04", "hora": "18/06 12:00", "local": "Chequia", "visitante": "Sudáfrica"},
-            {"#": "05", "hora": "24/06 22:00", "local": "México", "visitante": "Chequia"},
-            {"#": "06", "hora": "24/06 22:00", "local": "Sudáfrica", "visitante": "Corea del Sur"}
-        ],
-        "GRUPO B": [
-            {"#": "07", "hora": "12/06 13:00", "local": "Canadá", "visitante": "Bosnia-Herzegovina"},
-            {"#": "08", "hora": "13/06 13:00", "local": "Qatar", "visitante": "Suiza"},
-            {"#": "09", "hora": "18/06 13:00", "local": "Suiza", "visitante": "Bosnia-Herzegovina"},
-            {"#": "10", "hora": "18/06 16:00", "local": "Canadá", "visitante": "Qatar"},
-            {"#": "11", "hora": "24/06 13:00", "local": "Bosnia-Herzegovina", "visitante": "Qatar"},
-            {"#": "12", "hora": "24/06 13:00", "local": "Suiza", "visitante": "Canadá"}
-        ],
-        "GRUPO C": [
-            {"#": "13", "hora": "13/06 16:00", "local": "Brasil", "visitante": "Marruecos"},
-            {"#": "14", "hora": "14/06 19:00", "local": "Haití", "visitante": "Escocia"},
-            {"#": "15", "hora": "19/06 16:00", "local": "Escocia", "visitante": "Marruecos"},
-            {"#": "16", "hora": "20/06 19:00", "local": "Brasil", "visitante": "Haití"},
-            {"#": "17", "hora": "24/06 16:00", "local": "Marruecos", "visitante": "Haití"},
-            {"#": "18", "hora": "24/06 16:00", "local": "Escocia", "visitante": "Brasil"}
-        ],
-        "GRUPO D": [
-            {"#": "19", "hora": "13/06 19:00", "local": "EE.UU.", "visitante": "Paraguay"},
-            {"#": "20", "hora": "14/06 22:00", "local": "Australia", "visitante": "Turquía"},
-            {"#": "21", "hora": "19/06 13:00", "local": "EE.UU.", "visitante": "Australia"},
-            {"#": "22", "hora": "20/06 22:00", "local": "Turquía", "visitante": "Paraguay"},
-            {"#": "23", "hora": "26/06 20:00", "local": "Paraguay", "visitante": "Australia"},
-            {"#": "24", "hora": "26/06 20:00", "local": "Turquía", "visitante": "EE.UU."}
-        ],
-        "GRUPO E": [
-            {"#": "25", "hora": "14/06 11:00", "local": "Alemania", "visitante": "Curazao"},
-            {"#": "26", "hora": "15/06 17:00", "local": "Costa de Marfil", "visitante": "Ecuador"},
-            {"#": "27", "hora": "20/06 14:00", "local": "Alemania", "visitante": "Costa de Marfil"},
-            {"#": "28", "hora": "21/06 18:00", "local": "Ecuador", "visitante": "Curazao"},
-            {"#": "29", "hora": "25/06 14:00", "local": "Curazao", "visitante": "Costa de Marfil"},
-            {"#": "30", "hora": "25/06 14:00", "local": "Ecuador", "visitante": "Alemania"}
-        ],
-        "GRUPO F": [
-            {"#": "31", "hora": "14/06 14:00", "local": "Países Bajos", "visitante": "Japón"},
-            {"#": "32", "hora": "15/06 20:00", "local": "Suecia", "visitante": "Túnez"},
-            {"#": "33", "hora": "20/06 11:00", "local": "Países Bajos", "visitante": "Suecia"},
-            {"#": "34", "hora": "21/06 22:00", "local": "Túnez", "visitante": "Japón"},
-            {"#": "35", "hora": "26/06 17:00", "local": "Japón", "visitante": "Suecia"},
-            {"#": "36", "hora": "26/06 17:00", "local": "Túnez", "visitante": "Países Bajos"}
-        ],
-        "GRUPO G": [
-            {"#": "37", "hora": "15/06 13:00", "local": "Bélgica", "visitante": "Egipto"},
-            {"#": "38", "hora": "16/06 19:00", "local": "Irán", "visitante": "Nueva Zelanda"},
-            {"#": "39", "hora": "21/06 13:00", "local": "Bélgica", "visitante": "Irán"},
-            {"#": "40", "hora": "22/06 19:00", "local": "Nueva Zelanda", "visitante": "Egipto"},
-            {"#": "41", "hora": "27/06 21:00", "local": "Egipto", "visitante": "Irán"},
-            {"#": "42", "hora": "27/06 21:00", "local": "Nueva Zelanda", "visitante": "Bélgica"}
-        ],
-        "GRUPO H": [
-            {"#": "43", "hora": "15/06 10:00", "local": "España", "visitante": "Cabo Verde"},
-            {"#": "44", "hora": "15/06 16:00", "local": "Arabia Saudita", "visitante": "Uruguay"},
-            {"#": "45", "hora": "21/06 10:00", "local": "España", "visitante": "Arabia Saudita"},
-            {"#": "46", "hora": "21/06 16:00", "local": "Uruguay", "visitante": "Cabo Verde"},
-            {"#": "47", "hora": "27/06 18:00", "local": "Cabo Verde", "visitante": "Arabia Saudita"},
-            {"#": "48", "hora": "27/06 18:00", "local": "Uruguay", "visitante": "España"}
-        ],
-        "GRUPO I": [
-            {"#": "49", "hora": "16/06 13:00", "local": "Francia", "visitante": "Senegal"},
-            {"#": "50", "hora": "16/06 16:00", "local": "Irak", "visitante": "Noruega"},
-            {"#": "51", "hora": "22/06 15:00", "local": "Francia", "visitante": "Irak"},
-            {"#": "52", "hora": "23/06 18:00", "local": "Noruega", "visitante": "Senegal"},
-            {"#": "53", "hora": "26/06 13:00", "local": "Noruega", "visitante": "Francia"},
-            {"#": "54", "hora": "26/06 13:00", "local": "Senegal", "visitante": "Irak"}
-        ],
-        "GRUPO J": [
-            {"#": "55", "hora": "17/06 19:00", "local": "Argentina", "visitante": "Argelia"},
-            {"#": "56", "hora": "17/06 22:00", "local": "Austria", "visitante": "Jordania"},
-            {"#": "57", "hora": "22/06 11:00", "local": "Argentina", "visitante": "Austria"},
-            {"#": "58", "hora": "23/06 21:00", "local": "Jordania", "visitante": "Argelia"},
-            {"#": "59", "hora": "28/06 20:00", "local": "Argelia", "visitante": "Austria"},
-            {"#": "60", "hora": "28/06 20:00", "local": "Jordania", "visitante": "Argentina"}
-        ],
-        "GRUPO K": [
-            {"#": "61", "hora": "17/06 11:00", "local": "Portugal", "visitante": "RD Congo"},
-            {"#": "62", "hora": "18/06 20:00", "local": "Uzbekistán", "visitante": "Colombia"},
-            {"#": "63", "hora": "23/06 11:00", "local": "Portugal", "visitante": "Uzbekistán"},
-            {"#": "64", "hora": "24/06 20:00", "local": "Colombia", "visitante": "RD Congo"},
-            {"#": "65", "hora": "28/06 17:30", "local": "Colombia", "visitante": "Portugal"},
-            {"#": "66", "hora": "28/06 17:30", "local": "RD Congo", "visitante": "Uzbekistán"}
-        ],
-        "GRUPO L": [
-            {"#": "67", "hora": "17/06 14:00", "local": "Inglaterra", "visitante": "Croacia"},
-            {"#": "68", "hora": "18/06 17:00", "local": "Ghana", "visitante": "Panamá"},
-            {"#": "69", "hora": "23/06 14:00", "local": "Inglaterra", "visitante": "Ghana"},
-            {"#": "70", "hora": "24/06 17:00", "local": "Panamá", "visitante": "Croacia"},
-            {"#": "71", "hora": "27/06 15:00", "local": "Croacia", "visitante": "Ghana"},
-            {"#": "72", "hora": "27/06 15:00", "local": "Panamá", "visitante": "Inglaterra"}
-        ]
+        "Grupo A": [{"#": "01", "local": "México", "visitante": "Sudáfrica"}, {"#": "02", "local": "Corea del Sur", "visitante": "Chequia"}, {"#": "03", "local": "México", "visitante": "Corea del Sur"}, {"#": "04", "local": "Chequia", "visitante": "Sudáfrica"}, {"#": "05", "local": "México", "visitante": "Chequia"}, {"#": "06", "local": "Sudáfrica", "visitante": "Corea del Sur"}],
+        "Grupo B": [{"#": "07", "local": "Canadá", "visitante": "Bosnia y Herzegovina"}, {"#": "08", "local": "Qatar", "visitante": "Suiza"}, {"#": "09", "local": "Canadá", "visitante": "Qatar"}, {"#": "10", "local": "Suiza", "visitante": "Bosnia y Herzegovina"}, {"#": "11", "local": "Suiza", "visitante": "Canadá"}, {"#": "12", "local": "Bosnia y Herzegovina", "visitante": "Qatar"}],
+        "Grupo C": [{"#": "13", "local": "Brasil", "visitante": "Marruecos"}, {"#": "14", "local": "Haití", "visitante": "Escocia"}, {"#": "15", "local": "Brasil", "visitante": "Haití"}, {"#": "16", "local": "Escocia", "visitante": "Marruecos"}, {"#": "17", "local": "Escocia", "visitante": "Brasil"}, {"#": "18", "local": "Marruecos", "visitante": "Haití"}],
+        "Grupo D": [{"#": "19", "local": "Estados Unidos", "visitante": "Paraguay"}, {"#": "20", "local": "Australia", "visitante": "Turquía"}, {"#": "21", "local": "Estados Unidos", "visitante": "Australia"}, {"#": "22", "local": "Turquía", "visitante": "Paraguay"}, {"#": "23", "local": "Estados Unidos", "visitante": "Turquía"}, {"#": "24", "local": "Paraguay", "visitante": "Australia"}],
+        "Grupo E": [{"#": "25", "local": "Alemania", "visitante": "Curazao"}, {"#": "26", "local": "Costa de Marfil", "visitante": "Ecuador"}, {"#": "27", "local": "Alemania", "visitante": "Costa de Marfil"}, {"#": "28", "local": "Ecuador", "visitante": "Curazao"}, {"#": "29", "local": "Ecuador", "visitante": "Alemania"}, {"#": "30", "local": "Curazao", "visitante": "Costa de Marfil"}],
+        "Grupo F": [{"#": "31", "local": "Países Bajos", "visitante": "Japón"}, {"#": "32", "local": "Suecia", "visitante": "Túnez"}, {"#": "33", "local": "Países Bajos", "visitante": "Suecia"}, {"#": "34", "local": "Túnez", "visitante": "Japón"}, {"#": "35", "local": "Japón", "visitante": "Suecia"}, {"#": "36", "local": "Túnez", "visitante": "Países Bajos"}],
+        "Grupo G": [{"#": "37", "local": "Bélgica", "visitante": "Egipto"}, {"#": "38", "local": "Irán", "visitante": "Nueva Zelanda"}, {"#": "39", "local": "Bélgica", "visitante": "Irán"}, {"#": "40", "local": "Nueva Zelanda", "visitante": "Egipto"}, {"#": "41", "local": "Egipto", "visitante": "Irán"}, {"#": "42", "local": "Nueva Zelanda", "visitante": "Bélgica"}],
+        "Grupo H": [{"#": "43", "local": "España", "visitante": "Cabo Verde"}, {"#": "44", "local": "Arabia Saudita", "visitante": "Uruguay"}, {"#": "45", "local": "España", "visitante": "Arabia Saudita"}, {"#": "46", "local": "Uruguay", "visitante": "Cabo Verde"}, {"#": "47", "local": "Cabo Verde", "visitante": "Arabia Saudita"}, {"#": "48", "local": "Uruguay", "visitante": "España"}],
+        "Grupo I": [{"#": "49", "local": "Francia", "visitante": "Senegal"}, {"#": "50", "local": "Irak", "visitante": "Noruega"}, {"#": "51", "local": "Francia", "visitante": "Irak"}, {"#": "52", "local": "Noruega", "visitante": "Senegal"}, {"#": "53", "local": "Noruega", "visitante": "Francia"}, {"#": "54", "local": "Senegal", "visitante": "Irak"}],
+        "Grupo J": [{"#": "55", "local": "Argentina", "visitante": "Argelia"}, {"#": "56", "local": "Austria", "visitante": "Jordania"}, {"#": "57", "local": "Argentina", "visitante": "Austria"}, {"#": "58", "local": "Jordania", "visitante": "Argelia"}, {"#": "59", "local": "Jordania", "visitante": "Argentina"}, {"#": "60", "local": "Argelia", "visitante": "Austria"}],
+        "Grupo K": [{"#": "61", "local": "Portugal", "visitante": "RD Congo"}, {"#": "62", "local": "Uzbekistán", "visitante": "Colombia"}, {"#": "63", "local": "Portugal", "visitante": "Uzbekistán"}, {"#": "64", "local": "Colombia", "visitante": "RD Congo"}, {"#": "65", "local": "Colombia", "visitante": "Portugal"}, {"#": "66", "local": "RD Congo", "visitante": "Uzbekistán"}],
+        "Grupo L": [{"#": "67", "local": "Inglaterra", "visitante": "Croacia"}, {"#": "68", "local": "Ghana", "visitante": "Panamá"}, {"#": "69", "local": "Inglaterra", "visitante": "Ghana"}, {"#": "70", "local": "Panamá", "visitante": "Croacia"}, {"#": "71", "local": "Panamá", "visitante": "Inglaterra"}, {"#": "72", "local": "Croacia", "visitante": "Ghana"}]
     }
 
-# Lógica de visualización
 calendario = obtener_calendario()
 pronosticos = {}
 
+# Interfaz dinámica
 for grupo, juegos in calendario.items():
-    st.subheader(grupo)
-    for juego in juegos:
-        cols = st.columns([4, 2, 1, 2, 4])
-        cols[0].write(f"P{juego['#']} | {juego['hora']}")
-        cols[1].write(f"**{juego['local']}**")
-        loc = cols[2].number_input("L", min_value=0, key=f"l{juego['#']}", label_visibility="collapsed")
-        cols[2].write("vs")
-        vis = cols[3].number_input("V", min_value=0, key=f"v{juego['#']}", label_visibility="collapsed")
-        cols[4].write(f"**{juego['visitante']}**")
-        pronosticos[juego['#']] = {"local": loc, "visitante": vis}
+    with st.expander(f"📍 {grupo}"):
+        for juego in juegos:
+            c1, c2, c3 = st.columns([3, 2, 3])
+            with c1: st.write(f"**{juego['local']}**")
+            with c2:
+                loc = st.number_input("L", min_value=0, key=f"l{juego['#']}")
+                vis = st.number_input("V", min_value=0, key=f"v{juego['#']}")
+            with c3: st.write(f"**{juego['visitante']}**")
+            pronosticos[juego['#']] = {"local": loc, "visitante": vis}
 
+# Guardar información
 if st.button("💾 GUARDAR PRONÓSTICOS"):
     if nombre:
         data = {"participante": nombre, "pronosticos": pronosticos}
-        st.download_button("📥 Descargar JSON", json.dumps(data), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+        st.download_button("📥 Descargar Archivo JSON", json.dumps(data), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+    else:
+        st.error("Por favor, ingresa tu nombre primero.")
