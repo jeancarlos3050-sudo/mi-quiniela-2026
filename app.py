@@ -5,81 +5,73 @@ from fpdf import FPDF
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS Avanzado para fijar la estructura horizontal exacta de la imagen guía
+# CSS SEGURO Y COMPATIBLE: Fuerza alineaciones sin romper los componentes de Streamlit
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
     
-    /* Input de nombre con contraste académico */
+    /* Input de nombre */
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     
-    /* Contenedor maestro de la fila del partido: Forzado horizontal */
-    .fila-partido-absoluta {
+    /* Configuración global de las columnas de los partidos para alineación vertical */
+    div[data-testid="stColumn"] {
         display: flex;
-        flex-direction: row;
-        align-items: center; /* Alineación vertical perfecta en el eje medio */
+        align-items: center; /* Centrado vertical absoluto de todos los elementos */
         justify-content: center;
-        width: 100%;
-        padding: 4px 0;
     }
     
-    /* Equipo Local: Texto a la derecha con margen controlado */
-    .bloque-local-fijo {
-        text-align: right;
-        font-weight: bold;
-        color: white;
-        flex: 1;
-        padding-right: 15px;
-        font-size: 15px;
+    /* Forzar que el texto de la fecha no se rompa */
+    div[data-testid="stColumn"]:nth-of-type(1) p {
+        white-space: nowrap;
+        margin: 0;
     }
     
-    /* Contenedor unificado para Marcador - VS - Marcador */
-    .bloque-central-marcador {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 12px; /* Espaciado simétrico horizontal */
-        width: 220px; /* Ancho fijo para blindar la zona media */
-    }
-    
-    /* El "vs" amarillo centrado en la misma línea horizontal */
-    .vs-linea-perfecta {
-        color: #ffbc42;
-        font-weight: bold;
-        font-size: 15px;
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 1;
-        text-align: center;
-    }
-    
-    /* Equipo Visitante: Texto a la izquierda con margen controlado */
-    .bloque-visitante-fijo {
-        text-align: left;
-        font-weight: bold;
-        color: white;
-        flex: 1;
-        padding-left: 15px;
-        font-size: 15px;
-    }
-    
-    /* Forzar diseño exacto de los cuadros numéricos de Streamlit */
+    /* Ajuste milimétrico de las casillas numéricas */
     div[data-testid="stNumberInput"] {
-        width: 65px !important;
+        width: 70px !important;
+        margin: 0 auto !important;
     }
     div[data-testid="stNumberInput"] input {
         text-align: center !important;
-        width: 65px !important;
+        width: 70px !important;
         background-color: #ffffff !important;
         color: #000000 !important;
         font-weight: bold;
         border-radius: 4px !important;
+        padding: 2px !important;
     }
     
-    /* Ocultar etiquetas espurias de Streamlit para limpieza visual */
+    /* Ocultar etiquetas por defecto de Streamlit */
     div[data-testid="stNumberInput"] label {
         display: none !important;
+    }
+    
+    /* Estilo del VS amarillo en su propia línea media */
+    .vs-texto {
+        color: #ffbc42 !important;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1;
+    }
+    
+    /* Formato de nombres de equipos */
+    .team-local {
+        text-align: right;
+        font-weight: bold;
+        width: 100%;
+        padding-right: 10px;
+        white-space: nowrap;
+    }
+    
+    .team-visitante {
+        text-align: left;
+        font-weight: bold;
+        width: 100%;
+        padding-left: 10px;
+        white-space: nowrap;
     }
     
     h2 {color: #ffbc42 !important;}
@@ -122,32 +114,33 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            # Separamos la información de tiempo de la estructura del partido
-            cols = st.columns([2.5, 7.5])
+            # Una sola grilla horizontal limpia nativa de Streamlit para evitar duplicados y bugs
+            cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
             
-            # Bloque izquierdo: Identificador y horario
-            cols[0].write(f"Partido {juego[0]} | {juego[1]}")
+            # Columna 1: Datos del partido
+            cols[0].markdown(f"P{juego[0]} | {juego[1]}")
             
-            # Bloque derecho: El partido unificado en una sola línea horizontal indestructible
-            with cols[1]:
-                # Apertura de la fila del partido e inyección del equipo local
-                st.markdown(f'<div class="fila-partido-absoluta"><div class="bloque-local-fijo">{juego[2]}</div><div class="bloque-central-marcador">', unsafe_allow_html=True)
-                
-                # Renderizado de los inputs de Streamlit lado a lado con el VS en la misma línea
-                col_num1, col_vs, col_num2 = st.columns([1, 0.4, 1])
-                with col_num1:
-                    loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-                with col_vs:
-                    st.markdown('<p class="vs-linea-perfecta">vs</p>', unsafe_allow_html=True)
-                with col_num2:
-                    vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-                
-                # Inyección del equipo visitante y cierre definitivo del contenedor horizontal
-                st.markdown(f'</div><div class="bloque-visitante-fijo">{juego[3]}</div></div>', unsafe_allow_html=True)
+            # Columna 2: País Local
+            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
+            
+            # Columna 3: Marcador Local
+            with cols[2]:
+                loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
+            
+            # Columna 4: Separador "vs"
+            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
+            
+            # Columna 5: Marcador Visitante
+            with cols[4]:
+                vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
+            
+            # Columna 6: País Visitante
+            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
             
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-# Bloque final documental y de exportación
+# Bloque final de exportación
+st.write("---")
 c1, c2 = st.columns(2)
 with c1:
     if st.button("💾 GUARDAR JSON"):
