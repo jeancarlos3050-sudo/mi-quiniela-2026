@@ -10,7 +10,7 @@ st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    /* Ajuste para que la etiqueta del input sea blanca y visible */
+    /* Ajuste quirúrgico: Etiqueta del input blanca y visible */
     div[data-testid="stTextInput"] label {color: white !important; font-weight: bold !important;}
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
@@ -25,8 +25,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-# Ajuste quirúrgico: Texto simplificado y visible mediante CSS
-nombre = st.text_input("Nombre del participante:")
+nombre = st.text_input("Nombre Completo del Participante:")
 
 def obtener_calendario():
     return {
@@ -81,7 +80,6 @@ def generar_pdf(nombre_u, data_p, cal):
 
 calendario = obtener_calendario()
 pronosticos = {}
-
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
