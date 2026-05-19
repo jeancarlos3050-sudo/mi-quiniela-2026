@@ -3,22 +3,17 @@ import json
 from fpdf import FPDF
 from datetime import datetime
 
-# Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS SEGURO Y COMPATIBLE
+# CSS Simplificado para evitar errores de sintaxis
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    .stTextInput input {color: white !important; background-color: #1c2541 !important;}
-    div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
-    div[data-testid="stNumberInput"] {width: 70px !important; margin: 0 auto !important;}
-    div[data-testid="stNumberInput"] input {text-align: center !important; width: 70px !important; background-color: #ffffff !important; color: #000000 !important; font-weight: bold; border-radius: 4px !important; padding: 2px !important;}
-    div[data-testid="stNumberInput"] label {display: none !important;}
-    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center; margin: 0 !important; padding: 0 !important; line-height: 1;}
-    .team-local {text-align: right; font-weight: bold; width: 100%; padding-right: 10px; white-space: nowrap;}
-    .team-visitante {text-align: left; font-weight: bold; width: 100%; padding-left: 10px; white-space: nowrap;}
-    h2 {color: #ffbc42 !important;}
+    div[data-testid="stTextInput"] label {color: white !important; font-weight: bold !important;}
+    .stTextInput input {background-color: #1c2541 !important; color: white !important;}
+    .vs-texto {color: #ffbc42 !important; font-weight: bold; text-align: center;}
+    .team-local {text-align: right; font-weight: bold;}
+    .team-visitante {text-align: left; font-weight: bold;}
     </style>
 """, unsafe_html=True)
 
@@ -42,34 +37,21 @@ def obtener_calendario():
     }
 
 def generar_pdf(nombre_u, data_p, cal):
-    fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
-    pdf.cell(190, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
+    pdf.cell(190, 10, txt=f"Quiniela: {nombre_u}", ln=True, align='C')
     pdf.set_font("Arial", size=10)
-    pdf.cell(190, 10, txt=f"Fecha y hora de generación: {fecha_actual}", ln=True, align='C')
     pdf.ln(5)
-    pdf.set_font("Arial", 'B', 11)
-    pdf.set_fill_color(220, 220, 220)
-    pdf.cell(15, 10, "ID", border=1, fill=True, align='C')
-    pdf.cell(30, 10, "Fecha", border=1, fill=True, align='C')
-    pdf.cell(60, 10, "Local", border=1, fill=True)
-    pdf.cell(25, 10, "Pron.", border=1, fill=True, align='C')
-    pdf.cell(60, 10, "Visitante", border=1, fill=True)
-    pdf.ln()
-    pdf.set_font("Arial", size=10)
     for grupo, juegos in cal.items():
         pdf.set_font("Arial", 'B', 11)
         pdf.cell(190, 8, grupo, ln=True, fill=True)
         pdf.set_font("Arial", size=10)
         for juego in juegos:
-            id_p = juego[0]
-            val = data_p.get(id_p, {"local": 0, "visitante": 0})
-            pdf.cell(15, 8, id_p, border=1, align='C')
-            pdf.cell(30, 8, juego[1], border=1, align='C')
+            val = data_p.get(juego[0], {"local": 0, "visitante": 0})
+            pdf.cell(15, 8, juego[0], border=1, align='C')
             pdf.cell(60, 8, juego[2], border=1)
-            pdf.cell(25, 8, f"{val['local']} - {val['visitante']}", border=1, align='C')
+            pdf.cell(20, 8, f"{val['local']} - {val['visitante']}", border=1, align='C')
             pdf.cell(60, 8, juego[3], border=1)
             pdf.ln()
     return pdf.output(dest='S').encode('latin-1')
@@ -84,23 +66,15 @@ for grupo, juegos in calendario.items():
             cols[0].markdown(f"**P{juego[0]}**")
             cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
             with cols[2]:
-                loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
+                loc = st.number_input("L", min_value=0, key=f"l{juego[0]}", label_visibility="collapsed")
             cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
             with cols[4]:
-                vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
+                vis = st.number_input("V", min_value=0, key=f"v{juego[0]}", label_visibility="collapsed")
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-st.write("---")
-c1, c2 = st.columns(2)
-with c1:
-    if st.button("💾 GUARDAR JSON"):
-        if nombre:
-            data_final = {"participante": nombre, "pronosticos": pronosticos}
-            st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
-with c2:
-    if st.button("📄 GENERAR PDF"):
-        if nombre:
-            pdf_bytes = generar_pdf(nombre, pronosticos, calendario)
-            st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
-        else:
-            st.error("¡Ingresa tu nombre primero!")
+if st.button("💾 FINALIZAR Y GUARDAR"):
+    if nombre:
+        data = {"participante": nombre, "pronosticos": pronosticos}
+        st.download_button("📥 Descargar JSON", json.dumps(data), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+    else:
+        st.error("Ingresa tu nombre primero.")
