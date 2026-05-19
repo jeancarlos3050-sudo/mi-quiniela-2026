@@ -5,10 +5,17 @@ from fpdf import FPDF
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS SEGURO Y COMPATIBLE: Fuerza alineaciones sin romper los componentes de Streamlit
+# CSS SEGURO Y COMPATIBLE: Ajustes visuales de contraste y alineaciones
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
+    
+    /* MODIFICACIÓN: Texto de la etiqueta del input en blanco nítido y más grande */
+    div[data-testid="stTextInput"] label p {
+        color: #ffffff !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+    }
     
     /* Input de nombre */
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
@@ -41,7 +48,7 @@ st.markdown("""
         padding: 2px !important;
     }
     
-    /* Ocultar etiquetas por defecto de Streamlit */
+    /* Ocultar etiquetas por defecto de Streamlit en los partidos */
     div[data-testid="stNumberInput"] label {
         display: none !important;
     }
@@ -114,7 +121,6 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            # Una sola grilla horizontal limpia nativa de Streamlit para evitar duplicados y bugs
             cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
             
             # Columna 1: Datos del partido
