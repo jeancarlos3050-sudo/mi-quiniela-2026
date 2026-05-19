@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 from fpdf import FPDF
+from datetime import datetime # Importamos para obtener la fecha y hora
 
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
@@ -40,12 +41,15 @@ def obtener_calendario():
         "GRUPO L": [("67", "Inglaterra", "Croacia"), ("68", "Ghana", "Panamá"), ("69", "Inglaterra", "Ghana"), ("70", "Panamá", "Croacia"), ("71", "Croacia", "Ghana"), ("72", "Panamá", "Inglaterra")]
     }
 
-# --- FUNCIÓN PDF TIPO TABLA ---
+# --- FUNCIÓN PDF CON FECHA Y HORA ---
 def generar_pdf(nombre_u, data_p, cal):
+    fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
     pdf.cell(190, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
+    pdf.set_font("Arial", size=10)
+    pdf.cell(190, 10, txt=f"Fecha y hora de generación: {fecha_actual}", ln=True, align='C')
     pdf.ln(5)
     
     # Encabezado de tabla
