@@ -5,7 +5,7 @@ from fpdf import FPDF
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS para mantener la estética nítida
+# CSS SEGURO Y COMPATIBLE
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
@@ -23,18 +23,17 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Lógica de Limpieza
-if 'reset' not in st.session_state:
-    st.session_state.reset = False
-
+# Lógica de Limpieza Total
 def limpiar_todo():
-    # Al borrar el caché o recargar, los campos vuelven a su estado inicial
+    for key in st.session_state.keys():
+        del st.session_state[key]
     st.rerun()
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
+
+# AJUSTE: Etiqueta "Nombre del Participante:"
 nombre = st.text_input("Nombre del Participante:")
 
-# [Calendario y funciones omitidas para brevedad, son idénticas a la versión anterior]
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
@@ -70,27 +69,28 @@ for grupo, juegos in calendario.items():
         for juego in juegos:
             cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
             cols[0].markdown(f"P{juego[0]} | {juego[1]}")
-            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
+            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
+            # Marcadores inician en 0
             with cols[2]:
                 loc = st.number_input("L", min_value=0, value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
+            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
             with cols[4]:
                 vis = st.number_input("V", min_value=0, value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
+            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
-col_btns = st.columns(3)
-with col_btns[0]:
+col1, col2, col3 = st.columns(3)
+with col1:
     if st.button("💾 GUARDAR JSON"):
         if nombre:
             data_final = {"participante": nombre, "pronosticos": pronosticos}
             st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
-with col_btns[1]:
+with col2:
     if st.button("📄 GENERAR PDF"):
         if nombre:
             pdf_bytes = generar_pdf(nombre, pronosticos)
             st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
-with col_btns[2]:
+with col3:
     if st.button("🧹 LIMPIAR PRONÓSTICOS"):
         limpiar_todo()
