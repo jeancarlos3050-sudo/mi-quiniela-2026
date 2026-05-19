@@ -23,16 +23,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Inicializar bandera de reset
+# 1. INICIALIZACIÓN DEL ESTADO
 if 'reset' not in st.session_state:
     st.session_state.reset = False
 
-# Lógica de Limpieza Segura
+# 2. LÓGICA DE LIMPIEZA SEGURA
 def limpiar_todo():
     st.session_state.reset = True
     st.rerun()
 
-# Proceso de reset real antes de renderizar componentes
+# 3. PROCESO DE RESET (Se ejecuta antes de renderizar componentes)
 if st.session_state.reset:
     for key in st.session_state.keys():
         if key.startswith("l") or key.startswith("v"):
@@ -44,7 +44,7 @@ if st.session_state.reset:
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 
-# Input del nombre
+# Input del nombre con key fijo
 nombre = st.text_input("Nombre del Participante:", key="nombre_input")
 
 def obtener_calendario():
