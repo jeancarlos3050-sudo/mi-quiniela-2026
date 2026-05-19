@@ -6,11 +6,11 @@ from datetime import datetime
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS SEGURO Y COMPATIBLE
+# CSS: Ajustes para visibilidad y diseño
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    /* Ajuste quirúrgico: Etiqueta del input blanca y visible */
+    /* Ajuste para que la etiqueta del nombre sea blanca */
     div[data-testid="stTextInput"] label {color: white !important; font-weight: bold !important;}
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
@@ -25,7 +25,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre Completo del Participante:")
+nombre = st.text_input("Nombre del participante:")
 
 def obtener_calendario():
     return {
@@ -68,9 +68,8 @@ def generar_pdf(nombre_u, data_p, cal):
         pdf.cell(190, 8, grupo, ln=True, fill=True)
         pdf.set_font("Arial", size=10)
         for juego in juegos:
-            id_p = juego[0]
-            val = data_p.get(id_p, {"local": 0, "visitante": 0})
-            pdf.cell(15, 8, id_p, border=1, align='C')
+            val = data_p.get(juego[0], {"local": 0, "visitante": 0})
+            pdf.cell(15, 8, juego[0], border=1, align='C')
             pdf.cell(30, 8, juego[1], border=1, align='C')
             pdf.cell(60, 8, juego[2], border=1)
             pdf.cell(25, 8, f"{val['local']} - {val['visitante']}", border=1, align='C')
@@ -83,16 +82,15 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            cols = st.columns([1, 2, 2.5, 1.2, 0.6, 1.2, 2.5])
+            cols = st.columns([1, 2, 2.5, 1, 1, 2.5])
             cols[0].markdown(f"P{juego[0]}")
             cols[1].markdown(f"*{juego[1]}*")
             cols[2].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
             with cols[3]:
                 loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            cols[4].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
-            with cols[5]:
+            with cols[4]:
                 vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            cols[6].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
+            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
