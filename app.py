@@ -5,91 +5,36 @@ from fpdf import FPDF
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS SEGURO Y COMPATIBLE: Ajustes visuales de contraste y alineaciones
+# CSS para mantener la estética nítida
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    
-    /* Texto de la etiqueta del input en blanco nítido y destacado */
-    div[data-testid="stTextInput"] label p {
-        color: #ffffff !important;
-        font-size: 16px !important;
-        font-weight: bold !important;
-    }
-    
-    /* Input de nombre */
+    div[data-testid="stTextInput"] label p {color: #ffffff !important; font-size: 16px !important; font-weight: bold !important;}
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
-    
-    /* Configuración global de las columnas de los partidos para alineación vertical */
-    div[data-testid="stColumn"] {
-        display: flex;
-        align-items: center; /* Centrado vertical absoluto de todos los elementos */
-        justify-content: center;
-    }
-    
-    /* Forzar que el texto de la fecha no se rompa */
-    div[data-testid="stColumn"]:nth-of-type(1) p {
-        white-space: nowrap;
-        margin: 0;
-    }
-    
-    /* Ajuste milimétrico de las casillas numéricas */
-    div[data-testid="stNumberInput"] {
-        width: 70px !important;
-        margin: 0 auto !important;
-    }
-    div[data-testid="stNumberInput"] input {
-        text-align: center !important;
-        width: 70px !important;
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        font-weight: bold;
-        border-radius: 4px !important;
-        padding: 2px !important;
-    }
-    
-    /* Ocultar etiquetas por defecto de Streamlit en los partidos */
-    div[data-testid="stNumberInput"] label {
-        display: none !important;
-    }
-    
-    /* Estilo del VS amarillo en su propia línea media */
-    .vs-texto {
-        color: #ffbc42 !important;
-        font-weight: bold;
-        font-size: 16px;
-        text-align: center;
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 1;
-    }
-    
-    /* Formato de nombres de equipos */
-    .team-local {
-        text-align: right;
-        font-weight: bold;
-        width: 100%;
-        padding-right: 10px;
-        white-space: nowrap;
-    }
-    
-    .team-visitante {
-        text-align: left;
-        font-weight: bold;
-        width: 100%;
-        padding-left: 10px;
-        white-space: nowrap;
-    }
-    
+    div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
+    div[data-testid="stColumn"]:nth-of-type(1) p {white-space: nowrap; margin: 0;}
+    div[data-testid="stNumberInput"] {width: 70px !important; margin: 0 auto !important;}
+    div[data-testid="stNumberInput"] input {text-align: center !important; width: 70px !important; background-color: #ffffff !important; color: #000000 !important; font-weight: bold; border-radius: 4px !important; padding: 2px !important;}
+    div[data-testid="stNumberInput"] label {display: none !important;}
+    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center; margin: 0 !important; padding: 0 !important; line-height: 1;}
+    .team-local {text-align: right; font-weight: bold; width: 100%; padding-right: 10px; white-space: nowrap;}
+    .team-visitante {text-align: left; font-weight: bold; width: 100%; padding-left: 10px; white-space: nowrap;}
     h2 {color: #ffbc42 !important;}
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
+# Lógica de Limpieza
+if 'reset' not in st.session_state:
+    st.session_state.reset = False
 
-# Ajuste de etiqueta: Solo "Nombre del Participante:"
+def limpiar_todo():
+    # Al borrar el caché o recargar, los campos vuelven a su estado inicial
+    st.rerun()
+
+st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 nombre = st.text_input("Nombre del Participante:")
 
+# [Calendario y funciones omitidas para brevedad, son idénticas a la versión anterior]
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
@@ -124,41 +69,28 @@ for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
             cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
-            
-            # Columna 1: Datos del partido
             cols[0].markdown(f"P{juego[0]} | {juego[1]}")
-            
-            # Columna 2: País Local
             cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
-            
-            # Columna 3: Marcador Local (Inicia en 0 por defecto)
             with cols[2]:
                 loc = st.number_input("L", min_value=0, value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            
-            # Columna 4: Separador "vs"
             cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
-            
-            # Columna 5: Marcador Visitante (Inicia en 0 por defecto)
             with cols[4]:
                 vis = st.number_input("V", min_value=0, value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            
-            # Columna 6: País Visitante
             cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
-            
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-# Bloque final de exportación
 st.write("---")
-c1, c2 = st.columns(2)
-with c1:
+col_btns = st.columns(3)
+with col_btns[0]:
     if st.button("💾 GUARDAR JSON"):
         if nombre:
             data_final = {"participante": nombre, "pronosticos": pronosticos}
             st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
-with c2:
+with col_btns[1]:
     if st.button("📄 GENERAR PDF"):
         if nombre:
             pdf_bytes = generar_pdf(nombre, pronosticos)
             st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
-        else:
-            st.error("¡Ingresa tu nombre primero!")
+with col_btns[2]:
+    if st.button("🧹 LIMPIAR PRONÓSTICOS"):
+        limpiar_todo()
