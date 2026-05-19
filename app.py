@@ -2,10 +2,10 @@ import streamlit as st
 import json
 from fpdf import FPDF
 
-# Configuración base del sistema
+# Configuración base
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS 
+# CSS para el diseño
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
@@ -21,16 +21,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# LÓGICA PARA LIMPIAR
+# LÓGICA DE LIMPIEZA CORRECTA
 def limpiar_datos():
-    # Limpia el nombre
     st.session_state["nombre_input"] = ""
-    # Limpia todos los inputs de marcadores
     for key in st.session_state.keys():
         if key.startswith("l") or key.startswith("v"):
             st.session_state[key] = 0
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
+
+# Input del nombre
 nombre = st.text_input("Nombre Completo del Participante:", key="nombre_input")
 
 def obtener_calendario():
@@ -68,17 +68,16 @@ for grupo, juegos in calendario.items():
         for juego in juegos:
             cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
             cols[0].markdown(f"P{juego[0]} | {juego[1]}")
-            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
-            with cols[2]:
-                loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}")
-            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
-            with cols[4]:
-                vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}")
-            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
+            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
+            # Clave única obligatoria para evitar conflictos
+            loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}")
+            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
+            vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}")
+            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
-# Tres columnas para tus botones: Guardar, PDF y Limpiar
+# BOTONES: El botón de limpiar usa el callback "on_click"
 c1, c2, c3 = st.columns(3)
 with c1:
     if st.button("💾 GUARDAR JSON"):
@@ -93,6 +92,5 @@ with c2:
         else:
             st.error("¡Ingresa tu nombre!")
 with c3:
-    if st.button("🧹 LIMPIAR TODO"):
-        limpiar_datos()
-        st.rerun()
+    # Este es el cambio clave que evita el error
+    st.button("🧹 LIMPIAR TODO", on_click=limpiar_datos)
