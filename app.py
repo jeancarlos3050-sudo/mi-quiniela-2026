@@ -2,40 +2,53 @@ import streamlit as st
 import json
 from fpdf import FPDF
 
-# Configuración base (mantenida idéntica)
+# Configuración base intacta
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS CORREGIDO: Ajuste estricto para simetría de casillas y centrado del "vs"
+# CSS Quirúrgico para corregir la superposición y centrar el VS perfectamente
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
     
-    /* Forzar color blanco en el texto del input */
+    /* Forzar color blanco en el texto del input de nombre */
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     
-    /* CORRECCIÓN: Forzar que ambos recuadros numéricos tengan exactamente el mismo tamaño */
+    /* Contenedor del Bloque Central del Partido */
+    .bloque-partido {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        width: 100%;
+    }
+    
+    .nombre-equipo-der {
+        text-align: right;
+        font-weight: bold;
+        width: 120px;
+    }
+    
+    .nombre-equipo-izq {
+        text-align: left;
+        font-weight: bold;
+        width: 120px;
+    }
+    
+    /* Forzar tamaño idéntico y centrado de números en las casillas */
     div[data-testid="stNumberInput"] {
-        width: 70px !important;
+        width: 65px !important;
     }
     div[data-testid="stNumberInput"] input {
         text-align: center !important;
-        width: 70px !important;
+        width: 65px !important;
     }
     
-    /* CORRECCIÓN: Contenedor para el "vs" centrado en medio de las dos casillas */
-    .vs-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-    .vs-text-centrado {
-        font-weight: bold; 
-        color: #ffbc42; 
+    /* Estilo del VS abajo en el centro del espacio de las dos casillas */
+    .vs-text-fijo {
+        color: #ffbc42;
+        font-weight: bold;
         text-align: center;
-        margin: 0;
-        padding: 0;
+        margin-top: 5px;
     }
     
     h2 {color: #ffbc42 !important;}
@@ -78,26 +91,29 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            # Estructura balanceada de columnas para asegurar alineación e igual tamaño
-            cols = st.columns([3.5, 2.5, 1, 1, 1, 2.5, 1.5])
+            # Usamos 3 columnas controladas para evitar desbordes y pisado de textos
+            cols = st.columns([2.5, 6, 1.5])
             
+            # Columna 0: Información del partido
             cols[0].write(f"P{juego[0]} | {juego[1]}")
-            cols[1].markdown(f"<div style='text-align: right; font-weight: bold;'>{juego[2]}</div>", unsafe_allow_html=True)
             
-            # Casilla de Marcador Local
-            loc = cols[2].number_input("L", min_value=0, key=f"l{juego[0]}", label_visibility="collapsed")
-            
-            # Espacio intermedio donde se ubica el "vs" perfectamente centrado debajo del medio de los dos cuadros
-            cols[3].markdown('<div class="vs-container"><p class="vs-text-centrado">vs</p></div>', unsafe_allow_html=True)
-            
-            # Casilla de Marcador Visitante
-            vis = cols[4].number_input("V", min_value=0, key=f"v{juego[0]}", label_visibility="collapsed")
-            
-            cols[5].markdown(f"<div style='text-align: left; font-weight: bold;'>{juego[3]}</div>", unsafe_allow_html=True)
+            # Columna 1: El bloque central unificado (Nombres + Cajas)
+            with cols[1]:
+                # Fila superior: Nombre Local - Caja - Espacio - Caja - Nombre Visitante
+                sub_cols = st.columns([3, 1.5, 0.5, 1.5, 3])
+                
+                sub_cols[0].markdown(f"<div class='nombre-equipo-der'>{juego[2]}</div>", unsafe_allow_html=True)
+                loc = sub_cols[1].number_input("L", min_value=0, key=f"l{juego[0]}", label_visibility="collapsed")
+                
+                # Fila inferior / central para colocar el "vs" exactamente abajo en el medio de las casillas
+                sub_cols[2].markdown('<p class="vs-text-fijo">vs</p>', unsafe_allow_html=True)
+                
+                vis = sub_cols[3].number_input("V", min_value=0, key=f"v{juego[0]}", label_visibility="collapsed")
+                sub_cols[4].markdown(f"<div class='nombre-equipo-izq'>{juego[3]}</div>", unsafe_allow_html=True)
             
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-# Botones finales de descarga y guardado (mantenidos intactos)
+# Botones de guardado abajo intactos
 c1, c2 = st.columns(2)
 with c1:
     if st.button("💾 GUARDAR JSON"):
