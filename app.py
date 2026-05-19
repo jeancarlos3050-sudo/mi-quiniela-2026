@@ -23,29 +23,13 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 1. INICIALIZACIÓN DEL ESTADO
-if 'reset' not in st.session_state:
-    st.session_state.reset = False
-
-# 2. LÓGICA DE LIMPIEZA SEGURA
+# Lógica de Limpieza (la versión que tenías antes de los ajustes de bandera)
 def limpiar_todo():
-    st.session_state.reset = True
-    st.rerun()
-
-# 3. PROCESO DE RESET (Se ejecuta antes de renderizar componentes)
-if st.session_state.reset:
-    for key in st.session_state.keys():
-        if key.startswith("l") or key.startswith("v"):
-            st.session_state[key] = 0
-        elif key == "nombre_input":
-            st.session_state[key] = ""
-    st.session_state.reset = False
+    # Al borrar el caché o recargar, los campos vuelven a su estado inicial
     st.rerun()
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-
-# Input del nombre con key fijo
-nombre = st.text_input("Nombre del Participante:", key="nombre_input")
+nombre = st.text_input("Nombre del Participante:")
 
 def obtener_calendario():
     return {
