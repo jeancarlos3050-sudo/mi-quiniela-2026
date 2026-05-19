@@ -1,16 +1,18 @@
 import streamlit as st
 import json
+from fpdf import FPDF
 
-# Mantenemos tu configuración de diseño original
+# Configuración base
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
+# CSS para centrado y colores
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    .partido-box {background-color: #1c2541; padding: 10px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #3a506b;}
-    div[data-testid="stNumberInput"] {width: 60px !important;}
+    .stTextInput input {color: white !important; background-color: #1c2541 !important;}
+    .vs-text {text-align: center; font-weight: bold; color: #ffbc42; margin-top: 10px;}
     h2 {color: #ffbc42 !important;}
-    .vs-text {color: #ffbc42; font-weight: bold; text-align: center; padding-top: 10px;}
+    div[data-testid="stNumberInput"] input {text-align: center !important;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -33,11 +35,22 @@ def obtener_calendario():
         "GRUPO L": [("67", "17/06 14:00", "Inglaterra", "Croacia"), ("68", "18/06 17:00", "Ghana", "Panamá"), ("69", "23/06 14:00", "Inglaterra", "Ghana"), ("70", "24/06 17:00", "Panamá", "Croacia"), ("71", "27/06 15:00", "Croacia", "Ghana"), ("72", "27/06 15:00", "Panamá", "Inglaterra")]
     }
 
+def generar_pdf(nombre_u, data_p):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
+    pdf.set_font("Arial", size=11)
+    pdf.ln(10)
+    for id_p, res in data_p.items():
+        pdf.cell(200, 8, txt=f"Partido {id_p}: {res['local']} vs {res['visitante']}", ln=True)
+    return pdf.output(dest='S').encode('latin-1')
+
 calendario = obtener_calendario()
 pronosticos = {}
 
 for grupo, juegos in calendario.items():
-    with st.expander(grupo): # Función de contraer/desplegar aplicada
+    with st.expander(grupo):
         for juego in juegos:
             cols = st.columns([4, 2, 1, 2, 4])
             cols[0].write(f"P{juego[0]} | {juego[1]}")
@@ -48,9 +61,16 @@ for grupo, juegos in calendario.items():
             cols[4].write(f"**{juego[3]}**")
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-if st.button("💾 GUARDAR"):
-    if nombre:
-        data_final = {"participante": nombre, "pronosticos": pronosticos}
-        st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
-    else:
-        st.error("Ingresa tu nombre.")
+c1, c2 = st.columns(2)
+with c1:
+    if st.button("💾 GUARDAR JSON"):
+        if nombre:
+            data_final = {"participante": nombre, "pronosticos": pronosticos}
+            st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+with c2:
+    if st.button("📄 GENERAR PDF"):
+        if nombre:
+            pdf_bytes = generar_pdf(nombre, pronosticos)
+            st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
+        else:
+            st.error("¡Ingresa tu nombre primero!")
