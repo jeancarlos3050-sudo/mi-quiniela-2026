@@ -6,12 +6,12 @@ from datetime import datetime
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS: Ajustes para visibilidad y diseño
+# CSS SEGURO Y COMPATIBLE
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    /* Ajuste para que la etiqueta del nombre sea blanca */
-    div[data-testid="stTextInput"] label {color: white !important; font-weight: bold !important;}
+    /* Ajuste quirúrgico: hace visible el nombre del participante */
+    div[data-testid="stTextInput"] label {color: white !important; font-weight: bold !important; font-size: 16px !important;}
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
     div[data-testid="stNumberInput"] {width: 70px !important; margin: 0 auto !important;}
@@ -25,7 +25,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre del participante:")
+nombre = st.text_input("Nombre Completo del Participante:")
 
 def obtener_calendario():
     return {
@@ -52,7 +52,6 @@ def generar_pdf(nombre_u, data_p, cal):
     pdf.set_font("Arial", size=10)
     pdf.cell(190, 10, txt=f"Fecha y hora de generación: {fecha_actual}", ln=True, align='C')
     pdf.ln(5)
-    
     pdf.set_font("Arial", 'B', 11)
     pdf.set_fill_color(220, 220, 220)
     pdf.cell(15, 10, "ID", border=1, fill=True, align='C')
@@ -61,15 +60,15 @@ def generar_pdf(nombre_u, data_p, cal):
     pdf.cell(25, 10, "Pron.", border=1, fill=True, align='C')
     pdf.cell(60, 10, "Visitante", border=1, fill=True)
     pdf.ln()
-    
     pdf.set_font("Arial", size=10)
     for grupo, juegos in cal.items():
         pdf.set_font("Arial", 'B', 11)
         pdf.cell(190, 8, grupo, ln=True, fill=True)
         pdf.set_font("Arial", size=10)
         for juego in juegos:
-            val = data_p.get(juego[0], {"local": 0, "visitante": 0})
-            pdf.cell(15, 8, juego[0], border=1, align='C')
+            id_p = juego[0]
+            val = data_p.get(id_p, {"local": 0, "visitante": 0})
+            pdf.cell(15, 8, id_p, border=1, align='C')
             pdf.cell(30, 8, juego[1], border=1, align='C')
             pdf.cell(60, 8, juego[2], border=1)
             pdf.cell(25, 8, f"{val['local']} - {val['visitante']}", border=1, align='C')
@@ -82,15 +81,16 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            cols = st.columns([1, 2, 2.5, 1, 1, 2.5])
+            cols = st.columns([1, 2, 2.5, 1.2, 0.6, 1.2, 2.5])
             cols[0].markdown(f"P{juego[0]}")
             cols[1].markdown(f"*{juego[1]}*")
             cols[2].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
             with cols[3]:
                 loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            with cols[4]:
+            cols[4].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
+            with cols[5]:
                 vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
+            cols[6].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
