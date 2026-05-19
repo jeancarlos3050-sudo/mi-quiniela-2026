@@ -23,19 +23,28 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Lógica de Limpieza corregida
+# Inicializar bandera de reset
+if 'reset' not in st.session_state:
+    st.session_state.reset = False
+
+# Lógica de Limpieza Segura
 def limpiar_todo():
-    # Reiniciamos los valores en session_state sin eliminar las keys
+    st.session_state.reset = True
+    st.rerun()
+
+# Proceso de reset real antes de renderizar componentes
+if st.session_state.reset:
     for key in st.session_state.keys():
         if key.startswith("l") or key.startswith("v"):
             st.session_state[key] = 0
         elif key == "nombre_input":
             st.session_state[key] = ""
+    st.session_state.reset = False
     st.rerun()
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 
-# Agregamos key al input para poder controlarlo desde la limpieza
+# Input del nombre
 nombre = st.text_input("Nombre del Participante:", key="nombre_input")
 
 def obtener_calendario():
@@ -73,13 +82,13 @@ for grupo, juegos in calendario.items():
         for juego in juegos:
             cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
             cols[0].markdown(f"P{juego[0]} | {juego[1]}")
-            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
+            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
             with cols[2]:
                 loc = st.number_input("L", min_value=0, value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
+            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
             with cols[4]:
                 vis = st.number_input("V", min_value=0, value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
+            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
