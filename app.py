@@ -23,18 +23,21 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Lógica de Limpieza
-if 'reset' not in st.session_state:
-    st.session_state.reset = False
-
+# Lógica de Limpieza corregida
 def limpiar_todo():
-    # Al borrar el caché o recargar, los campos vuelven a su estado inicial
+    # Reiniciamos los valores en session_state sin eliminar las keys
+    for key in st.session_state.keys():
+        if key.startswith("l") or key.startswith("v"):
+            st.session_state[key] = 0
+        elif key == "nombre_input":
+            st.session_state[key] = ""
     st.rerun()
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre del Participante:")
 
-# [Calendario y funciones omitidas para brevedad, son idénticas a la versión anterior]
+# Agregamos key al input para poder controlarlo desde la limpieza
+nombre = st.text_input("Nombre del Participante:", key="nombre_input")
+
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
