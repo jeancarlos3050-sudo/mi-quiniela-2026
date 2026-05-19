@@ -1,24 +1,24 @@
 import streamlit as st
 import json
 
-# Configuración inicial
+# Configuración de página
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="wide")
 
-# CSS para el diseño visual solicitado
+# CSS para el diseño visual tipo "Formulario Oficial"
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
     .grupo-box {background-color: #16213e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #4a5d7e;}
     .vs-text {text-align: center; font-weight: bold; color: #ffbc42; padding-top: 10px;}
-    h1, h2 {color: #ffbc42 !important;}
+    h2 {color: #ffbc42 !important;}
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS OFICIALES")
 nombre = st.text_input("Nombre Completo del Participante:")
 
-# Calendario oficial integrado según su información
 def obtener_calendario():
+    # Estructura maestra con los 72 partidos oficiales
     return {
         "GRUPO A": [("01", "11/06 13h", "México", "Sudáfrica"), ("02", "12/06 20h", "Corea del Sur", "Chequia"), ("03", "18/06 10h", "Chequia", "Sudáfrica"), ("04", "19/06 19h", "México", "Corea del Sur"), ("05", "25/06 19h", "Chequia", "México"), ("06", "25/06 19h", "Sudáfrica", "Corea del Sur")],
         "GRUPO B": [("07", "12/06 13h", "Canadá", "Bosnia-Herzegovina"), ("08", "13/06 13h", "Qatar", "Suiza"), ("09", "18/06 13h", "Suiza", "Bosnia-Herzegovina"), ("10", "18/06 16h", "Canadá", "Qatar"), ("11", "24/06 13h", "Bosnia-Herzegovina", "Qatar"), ("12", "24/06 13h", "Suiza", "Canadá")],
@@ -37,7 +37,6 @@ def obtener_calendario():
 calendario = obtener_calendario()
 pronosticos = {}
 
-# Generar interfaz
 for grupo, partidos in calendario.items():
     st.markdown(f'<div class="grupo-box"><h2>{grupo}</h2>', unsafe_allow_html=True)
     for p in partidos:
@@ -51,11 +50,10 @@ for grupo, partidos in calendario.items():
         pronosticos[p[0]] = {"local": loc, "visitante": vis}
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Acción final
 if st.button("💾 GUARDAR Y FINALIZAR"):
     if nombre:
         data = {"participante": nombre, "pronosticos": pronosticos}
         st.download_button("📥 Descargar Archivo JSON", json.dumps(data), f"Quiniela_{nombre.replace(' ', '_')}.json")
-        st.success("Pronósticos guardados. Para el PDF, use el botón de imprimir de su navegador (Ctrl+P).")
+        st.success("¡Pronósticos guardados! Para obtener el PDF: Presione Ctrl+P (o Cmd+P) e imprima esta página.")
     else:
         st.error("Por favor, ingrese el nombre del participante.")
