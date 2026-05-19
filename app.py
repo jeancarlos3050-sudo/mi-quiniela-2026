@@ -1,31 +1,37 @@
 import streamlit as st
 import json
 from fpdf import FPDF
-from datetime import datetime
-
+from datetime import datetime 
+ 
 # Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
-
-# CSS para diseño y visibilidad
+ 
+# CSS SEGURO Y COMPATIBLE
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    /* Ajuste de visibilidad para el label del nombre */
+    .stTextInput input {color: white !important; background-color: #1c2541 !important;}
+    /* CORRECCIÓN DE VISIBILIDAD DE LA ETIQUETA */
     div[data-testid="stTextInput"] label {
         color: white !important; 
         font-weight: bold !important; 
         font-size: 1.1rem !important;
     }
-    .stTextInput input {color: white !important; background-color: #1c2541 !important;}
-    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center; margin-top: 20px;}
-    .team-local {text-align: right; font-weight: bold; margin-top: 20px;}
-    .team-visitante {text-align: left; font-weight: bold; margin-top: 20px;}
+    div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
+    div[data-testid="stNumberInput"] {width: 70px !important; margin: 0 auto !important;}
+    div[data-testid="stNumberInput"] input {text-align: center !important; width: 70px !important; background-color: #ffffff !important; color: #000000 !important; font-weight: bold; border-radius: 4px !important; padding: 2px !important;}
+    div[data-testid="stNumberInput"] label {display: none !important;}
+    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center; margin: 0 !important; padding: 0 !important; line-height: 1;}
+    .team-local {text-align: right; font-weight: bold; width: 100%; padding-right: 10px; white-space: nowrap;}
+    .team-visitante {text-align: left; font-weight: bold; width: 100%; padding-left: 10px; white-space: nowrap;}
+    h2 {color: #ffbc42 !important;}
     </style>
 """, unsafe_allow_html=True)
-
+ 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre Completo del Participante:")
-
+# CAMBIO DE TEXTO DE ETIQUETA
+nombre = st.text_input("Nombre del participante:")
+ 
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
@@ -41,63 +47,71 @@ def obtener_calendario():
         "GRUPO K": [("61", "17/06 11:00", "Portugal", "RD Congo"), ("62", "18/06 20:00", "Uzbekistán", "Colombia"), ("63", "23/06 11:00", "Portugal", "Uzbekistán"), ("64", "24/06 20:00", "Colombia", "RD Congo"), ("65", "28/06 17:30", "Colombia", "Portugal"), ("66", "28/06 17:30", "RD Congo", "Uzbekistán")],
         "GRUPO L": [("67", "17/06 14:00", "Inglaterra", "Croacia"), ("68", "18/06 17:00", "Ghana", "Panamá"), ("69", "23/06 14:00", "Inglaterra", "Ghana"), ("70", "24/06 17:00", "Panamá", "Croacia"), ("71", "27/06 15:00", "Croacia", "Ghana"), ("72", "27/06 15:00", "Panamá", "Inglaterra")]
     }
-
+ 
 def generar_pdf(nombre_u, data_p, cal):
+    fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
-    pdf.cell(190, 10, txt=f"Quiniela: {nombre_u}", ln=True, align='C')
+    pdf.cell(190, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
     pdf.set_font("Arial", size=10)
-    pdf.cell(190, 10, txt=f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
-    pdf.ln(10)
+    pdf.cell(190, 10, txt=f"Fecha y hora de generación: {fecha_actual}", ln=True, align='C')
+    pdf.ln(5)
     
-    pdf.set_fill_color(220, 220, 220)
     pdf.set_font("Arial", 'B', 11)
-    pdf.cell(15, 10, "ID", 1, 0, 'C', True)
-    pdf.cell(30, 10, "Fecha", 1, 0, 'C', True)
-    pdf.cell(60, 10, "Local", 1, 0, 'C', True)
-    pdf.cell(25, 10, "Pron.", 1, 0, 'C', True)
-    pdf.cell(60, 10, "Visitante", 1, 1, 'C', True)
+    pdf.set_fill_color(220, 220, 220)
+    pdf.cell(15, 10, "ID", border=1, fill=True, align='C')
+    pdf.cell(30, 10, "Fecha", border=1, fill=True, align='C')
+    pdf.cell(60, 10, "Local", border=1, fill=True)
+    pdf.cell(25, 10, "Pron.", border=1, fill=True, align='C')
+    pdf.cell(60, 10, "Visitante", border=1, fill=True)
+    pdf.ln()
     
     pdf.set_font("Arial", size=10)
-    for grupo, partidos in cal.items():
+    for grupo, juegos in cal.items():
         pdf.set_font("Arial", 'B', 11)
-        pdf.cell(190, 8, grupo, 1, 1, 'L', True)
+        pdf.cell(190, 8, grupo, ln=True, fill=True)
         pdf.set_font("Arial", size=10)
-        for p in partidos:
-            res = data_p.get(p[0], {"local": 0, "visitante": 0})
-            pdf.cell(15, 8, p[0], 1)
-            pdf.cell(30, 8, p[1], 1)
-            pdf.cell(60, 8, p[2], 1)
-            pdf.cell(25, 8, f"{res['local']}-{res['visitante']}", 1, 0, 'C')
-            pdf.cell(60, 8, p[3], 1, 1)
+        for juego in juegos:
+            id_p = juego[0]
+            val = data_p.get(id_p, {"local": 0, "visitante": 0})
+            pdf.cell(15, 8, id_p, border=1, align='C')
+            pdf.cell(30, 8, juego[1], border=1, align='C')
+            pdf.cell(60, 8, juego[2], border=1)
+            pdf.cell(25, 8, f"{val['local']} - {val['visitante']}", border=1, align='C')
+            pdf.cell(60, 8, juego[3], border=1)
+            pdf.ln()
     return pdf.output(dest='S').encode('latin-1')
-
+ 
 calendario = obtener_calendario()
 pronosticos = {}
-
-for grupo, partidos in calendario.items():
+ 
+for grupo, juegos in calendario.items():
     with st.expander(grupo):
-        for p in partidos:
-            cols = st.columns([1, 2, 1, 0.5, 1, 2])
-            cols[0].write(f"P{p[0]}")
-            cols[1].markdown(f'<div class="team-local">{p[2]}</div>', unsafe_html=True)
-            with cols[2]:
-                l = st.number_input("L", 0, key=f"l{p[0]}", label_visibility="collapsed")
-            cols[3].markdown('<div class="vs-texto">vs</div>', unsafe_html=True)
-            with cols[4]:
-                v = st.number_input("V", 0, key=f"v{p[0]}", label_visibility="collapsed")
-            cols[5].markdown(f'<div class="team-visitante">{p[3]}</div>', unsafe_html=True)
-            pronosticos[p[0]] = {"local": l, "visitante": v}
-
+        for juego in juegos:
+            cols = st.columns([1, 2, 2.5, 1.2, 0.6, 1.2, 2.5])
+            cols[0].markdown(f"P{juego[0]}")
+            cols[1].markdown(f"*{juego[1]}*")
+            cols[2].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
+            with cols[3]:
+                loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
+            cols[4].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
+            with cols[5]:
+                vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
+            cols[6].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
+            pronosticos[juego[0]] = {"local": loc, "visitante": vis}
+ 
+st.write("---")
 c1, c2 = st.columns(2)
-if c1.button("💾 GUARDAR JSON"):
-    if nombre:
-        st.download_button("Descargar JSON", json.dumps({"participante": nombre, "pronosticos": pronosticos}), f"Quiniela_{nombre.replace(' ', '_')}.json")
-    else:
-        st.error("Ingrese su nombre")
-if c2.button("📄 GENERAR PDF"):
-    if nombre:
-        st.download_button("Descargar PDF", generar_pdf(nombre, pronosticos, calendario), f"Quiniela_{nombre.replace(' ', '_')}.pdf", "application/pdf")
-    else:
-        st.error("Ingrese su nombre")
+with c1:
+    if st.button("💾 GUARDAR JSON"):
+        if nombre:
+            data_final = {"participante": nombre, "pronosticos": pronosticos}
+            st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+with c2:
+    if st.button("📄 GENERAR PDF"):
+        if nombre:
+            pdf_bytes = generar_pdf(nombre, pronosticos, calendario)
+            st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
+        else:
+            st.error("¡Ingresa tu nombre primero!")
