@@ -2,80 +2,155 @@ import streamlit as st
 import json
 from fpdf import FPDF
 
-# Configuración de página
+# Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# Estilos CSS
+# CSS SEGURO Y COMPATIBLE: Fuerza alineaciones sin romper los componentes de Streamlit
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
+    
+    /* Input de nombre */
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
-    div[data-testid="stNumberInput"] {width: 70px !important; margin: 0 auto !important;}
-    div[data-testid="stNumberInput"] input {text-align: center !important; width: 70px !important; background-color: #ffffff !important; color: #000000 !important; font-weight: bold; border-radius: 4px !important; padding: 2px !important;}
-    div[data-testid="stNumberInput"] label {display: none !important;}
-    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center;}
-    .team-local {text-align: right; font-weight: bold; width: 100%; padding-right: 10px;}
-    .team-visitante {text-align: left; font-weight: bold; width: 100%; padding-left: 10px;}
+    
+    /* Configuración global de las columnas de los partidos para alineación vertical */
+    div[data-testid="stColumn"] {
+        display: flex;
+        align-items: center; /* Centrado vertical absoluto de todos los elementos */
+        justify-content: center;
+    }
+    
+    /* Forzar que el texto de la fecha no se rompa */
+    div[data-testid="stColumn"]:nth-of-type(1) p {
+        white-space: nowrap;
+        margin: 0;
+    }
+    
+    /* Ajuste milimétrico de las casillas numéricas */
+    div[data-testid="stNumberInput"] {
+        width: 70px !important;
+        margin: 0 auto !important;
+    }
+    div[data-testid="stNumberInput"] input {
+        text-align: center !important;
+        width: 70px !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-weight: bold;
+        border-radius: 4px !important;
+        padding: 2px !important;
+    }
+    
+    /* Ocultar etiquetas por defecto de Streamlit */
+    div[data-testid="stNumberInput"] label {
+        display: none !important;
+    }
+    
+    /* Estilo del VS amarillo en su propia línea media */
+    .vs-texto {
+        color: #ffbc42 !important;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1;
+    }
+    
+    /* Formato de nombres de equipos */
+    .team-local {
+        text-align: right;
+        font-weight: bold;
+        width: 100%;
+        padding-right: 10px;
+        white-space: nowrap;
+    }
+    
+    .team-visitante {
+        text-align: left;
+        font-weight: bold;
+        width: 100%;
+        padding-left: 10px;
+        white-space: nowrap;
+    }
+    
+    h2 {color: #ffbc42 !important;}
     </style>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-
-# --- LÓGICA DE RECARGA TOTAL ---
-# Esta parte maneja el parámetro de limpieza en la URL
-if st.query_params.get("reset") == "true":
-    st.session_state.clear()
-    st.query_params.clear()
-    st.rerun()
-
-def recargar_total():
-    st.query_params["reset"] = "true"
-    st.rerun()
-
-# --- INPUT NOMBRE ---
-nombre = st.text_input("Nombre del Participante:")
+nombre = st.text_input("Nombre Completo del Participante:")
 
 def obtener_calendario():
     return {
-        "GRUPO A": [("01", "México", "Sudáfrica"), ("02", "Corea del Sur", "Chequia"), ("03", "México", "Corea del Sur"), ("04", "Chequia", "Sudáfrica"), ("05", "México", "Chequia"), ("06", "Sudáfrica", "Corea del Sur")],
-        "GRUPO B": [("07", "Canadá", "Bosnia"), ("08", "Qatar", "Suiza"), ("09", "Suiza", "Bosnia"), ("10", "Canadá", "Qatar"), ("11", "Bosnia", "Qatar"), ("12", "Suiza", "Canadá")],
-        "GRUPO C": [("13", "Brasil", "Marruecos"), ("14", "Haití", "Escocia"), ("15", "Escocia", "Marruecos"), ("16", "Brasil", "Haití"), ("17", "Marruecos", "Haití"), ("18", "Escocia", "Brasil")],
-        "GRUPO D": [("19", "EE.UU.", "Paraguay"), ("20", "Australia", "Turquía"), ("21", "EE.UU.", "Australia"), ("22", "Turquía", "Paraguay"), ("23", "Paraguay", "Australia"), ("24", "Turquía", "EE.UU.")],
-        "GRUPO E": [("25", "Alemania", "Curazao"), ("26", "Costa de Marfil", "Ecuador"), ("27", "Alemania", "Costa de Marfil"), ("28", "Ecuador", "Curazao"), ("29", "Curazao", "Costa de Marfil"), ("30", "Ecuador", "Alemania")],
-        "GRUPO F": [("31", "Países Bajos", "Japón"), ("32", "Suecia", "Túnez"), ("33", "Países Bajos", "Suecia"), ("34", "Túnez", "Japón"), ("35", "Japón", "Suecia"), ("36", "Túnez", "Países Bajos")],
-        "GRUPO G": [("37", "Bélgica", "Egipto"), ("38", "Irán", "Nueva Zelanda"), ("39", "Bélgica", "Irán"), ("40", "Nueva Zelanda", "Egipto"), ("41", "Egipto", "Irán"), ("42", "Nueva Zelanda", "Bélgica")],
-        "GRUPO H": [("43", "España", "Cabo Verde"), ("44", "Arabia Saudita", "Uruguay"), ("45", "España", "Arabia Saudita"), ("46", "Uruguay", "Cabo Verde"), ("47", "Cabo Verde", "Arabia Saudita"), ("48", "Uruguay", "España")],
-        "GRUPO I": [("49", "Francia", "Senegal"), ("50", "Irak", "Noruega"), ("51", "Francia", "Irak"), ("52", "Noruega", "Senegal"), ("53", "Noruega", "Francia"), ("54", "Senegal", "Irak")],
-        "GRUPO J": [("55", "Argentina", "Argelia"), ("56", "Austria", "Jordania"), ("57", "Argentina", "Austria"), ("58", "Jordania", "Argelia"), ("59", "Argelia", "Austria"), ("60", "Jordania", "Argentina")],
-        "GRUPO K": [("61", "Portugal", "RD Congo"), ("62", "Uzbekistán", "Colombia"), ("63", "Portugal", "Uzbekistán"), ("64", "Colombia", "RD Congo"), ("65", "Colombia", "Portugal"), ("66", "RD Congo", "Uzbekistán")],
-        "GRUPO L": [("67", "Inglaterra", "Croacia"), ("68", "Ghana", "Panamá"), ("69", "Inglaterra", "Ghana"), ("70", "Panamá", "Croacia"), ("71", "Croacia", "Ghana"), ("72", "Panamá", "Inglaterra")]
+        "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
+        "GRUPO B": [("07", "12/06 13:00", "Canadá", "Bosnia-Herzegovina"), ("08", "13/06 13:00", "Qatar", "Suiza"), ("09", "18/06 13:00", "Suiza", "Bosnia-Herzegovina"), ("10", "18/06 16:00", "Canadá", "Qatar"), ("11", "24/06 13:00", "Bosnia-Herzegovina", "Qatar"), ("12", "24/06 13:00", "Suiza", "Canadá")],
+        "GRUPO C": [("13", "13/06 16:00", "Brasil", "Marruecos"), ("14", "14/06 19:00", "Haití", "Escocia"), ("15", "19/06 16:00", "Escocia", "Marruecos"), ("16", "20/06 19:00", "Brasil", "Haití"), ("17", "24/06 16:00", "Marruecos", "Haití"), ("18", "24/06 16:00", "Escocia", "Brasil")],
+        "GRUPO D": [("19", "13/06 19:00", "EE.UU.", "Paraguay"), ("20", "14/06 22:00", "Australia", "Turquía"), ("21", "19/06 13:00", "EE.UU.", "Australia"), ("22", "20/06 22:00", "Turquía", "Paraguay"), ("23", "26/06 20:00", "Paraguay", "Australia"), ("24", "26/06 20:00", "Turquía", "EE.UU.")],
+        "GRUPO E": [("25", "14/06 11:00", "Alemania", "Curazao"), ("26", "15/06 17:00", "Costa de Marfil", "Ecuador"), ("27", "20/06 14:00", "Alemania", "Costa de Marfil"), ("28", "21/06 18:00", "Ecuador", "Curazao"), ("29", "25/06 14:00", "Curazao", "Costa de Marfil"), ("30", "25/06 14:00", "Ecuador", "Alemania")],
+        "GRUPO F": [("31", "14/06 14:00", "Países Bajos", "Japón"), ("32", "15/06 20:00", "Suecia", "Túnez"), ("33", "20/06 11:00", "Países Bajos", "Suecia"), ("34", "21/06 22:00", "Túnez", "Japón"), ("35", "26/06 17:00", "Japón", "Suecia"), ("36", "26/06 17:00", "Túnez", "Países Bajos")],
+        "GRUPO G": [("37", "15/06 13:00", "Bélgica", "Egipto"), ("38", "16/06 19:00", "Irán", "Nueva Zelanda"), ("39", "21/06 13:00", "Bélgica", "Irán"), ("40", "22/06 19:00", "Nueva Zelanda", "Egipto"), ("41", "27/06 21:00", "Egipto", "Irán"), ("42", "27/06 21:00", "Nueva Zelanda", "Bélgica")],
+        "GRUPO H": [("43", "15/06 10:00", "España", "Cabo Verde"), ("44", "15/06 16:00", "Arabia Saudita", "Uruguay"), ("45", "21/06 10:00", "España", "Arabia Saudita"), ("46", "21/06 16:00", "Uruguay", "Cabo Verde"), ("47", "27/06 18:00", "Cabo Verde", "Arabia Saudita"), ("48", "27/06 18:00", "Uruguay", "España")],
+        "GRUPO I": [("49", "16/06 13:00", "Francia", "Senegal"), ("50", "16/06 16:00", "Irak", "Noruega"), ("51", "22/06 15:00", "Francia", "Irak"), ("52", "23/06 18:00", "Noruega", "Senegal"), ("53", "26/06 13:00", "Noruega", "Francia"), ("54", "26/06 13:00", "Senegal", "Irak")],
+        "GRUPO J": [("55", "17/06 19:00", "Argentina", "Argelia"), ("56", "17/06 22:00", "Austria", "Jordania"), ("57", "22/06 11:00", "Argentina", "Austria"), ("58", "23/06 21:00", "Jordania", "Argelia"), ("59", "28/06 20:00", "Argelia", "Austria"), ("60", "28/06 20:00", "Jordania", "Argentina")],
+        "GRUPO K": [("61", "17/06 11:00", "Portugal", "RD Congo"), ("62", "18/06 20:00", "Uzbekistán", "Colombia"), ("63", "23/06 11:00", "Portugal", "Uzbekistán"), ("64", "24/06 20:00", "Colombia", "RD Congo"), ("65", "28/06 17:30", "Colombia", "Portugal"), ("66", "28/06 17:30", "RD Congo", "Uzbekistán")],
+        "GRUPO L": [("67", "17/06 14:00", "Inglaterra", "Croacia"), ("68", "18/06 17:00", "Ghana", "Panamá"), ("69", "23/06 14:00", "Inglaterra", "Ghana"), ("70", "24/06 17:00", "Panamá", "Croacia"), ("71", "27/06 15:00", "Croacia", "Ghana"), ("72", "27/06 15:00", "Panamá", "Inglaterra")]
     }
+
+def generar_pdf(nombre_u, data_p):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
+    pdf.set_font("Arial", size=11)
+    pdf.ln(10)
+    for id_p, res in data_p.items():
+        pdf.cell(200, 8, txt=f"Partido {id_p}: {res['local']} vs {res['visitante']}", ln=True)
+    return pdf.output(dest='S').encode('latin-1')
 
 calendario = obtener_calendario()
 pronosticos = {}
 
-# Renderizado
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            c1, c2, c3, c4 = st.columns([2, 1, 1, 2])
-            c1.markdown(f'<div class="team-local">{juego[1]}</div>', unsafe_html=True)
-            loc = c2.number_input(f"L{juego[0]}", min_value=0, step=1)
-            vis = c3.number_input(f"V{juego[0]}", min_value=0, step=1)
-            c4.markdown(f'<div class="team-visitante">{juego[2]}</div>', unsafe_html=True)
+            # Una sola grilla horizontal limpia nativa de Streamlit para evitar duplicados y bugs
+            cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
+            
+            # Columna 1: Datos del partido
+            cols[0].markdown(f"P{juego[0]} | {juego[1]}")
+            
+            # Columna 2: País Local
+            cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
+            
+            # Columna 3: Marcador Local
+            with cols[2]:
+                loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
+            
+            # Columna 4: Separador "vs"
+            cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
+            
+            # Columna 5: Marcador Visitante
+            with cols[4]:
+                vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
+            
+            # Columna 6: País Visitante
+            cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
+            
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
+# Bloque final de exportación
 st.write("---")
-# Botones
-col1, col2, col3 = st.columns(3)
-with col1:
+c1, c2 = st.columns(2)
+with c1:
     if st.button("💾 GUARDAR JSON"):
         if nombre:
-            st.download_button("📥 Descargar", json.dumps({"participante": nombre, "datos": pronosticos}), "quiniela.json")
-with col2:
+            data_final = {"participante": nombre, "pronosticos": pronosticos}
+            st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+with c2:
     if st.button("📄 GENERAR PDF"):
-        st.write("PDF generado")
-with col3:
-    # EL BOTÓN QUE BUSCABAS
-    if st.button("🧹 LIMPIAR TODO"):
-        recargar_total()
+        if nombre:
+            pdf_bytes = generar_pdf(nombre, pronosticos)
+            st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
+        else:
+            st.error("¡Ingresa tu nombre primero!")
