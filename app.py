@@ -1,15 +1,16 @@
 import streamlit as st
 import json
 
-# Configuración de página
+# Mantenemos tu configuración de diseño original
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# Estilos CSS
 st.markdown("""
     <style>
-    .stApp {background-color: #0b132b; color: #ffffff;}
-    .vs-text {text-align: center; font-weight: bold; color: #ffbc42; padding: 10px 0;}
+    .stApp {background-color: #0b132b; color: white;}
+    .partido-box {background-color: #1c2541; padding: 10px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #3a506b;}
+    div[data-testid="stNumberInput"] {width: 60px !important;}
     h2 {color: #ffbc42 !important;}
+    .vs-text {color: #ffbc42; font-weight: bold; text-align: center; padding-top: 10px;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -18,40 +19,38 @@ nombre = st.text_input("Nombre Completo del Participante:")
 
 def obtener_calendario():
     return {
-        "GRUPO A": [("01", "11/06 13h", "México", "Sudáfrica"), ("02", "12/06 20h", "Corea del Sur", "Chequia"), ("03", "18/06 19h", "México", "Corea del Sur"), ("04", "18/06 12h", "Chequia", "Sudáfrica"), ("05", "24/06 22h", "México", "Chequia"), ("06", "24/06 22h", "Sudáfrica", "Corea del Sur")],
-        "GRUPO B": [("07", "12/06 13h", "Canadá", "Bosnia-Herzegovina"), ("08", "13/06 13h", "Qatar", "Suiza"), ("09", "18/06 13h", "Suiza", "Bosnia-Herzegovina"), ("10", "18/06 16h", "Canadá", "Qatar"), ("11", "24/06 13h", "Bosnia-Herzegovina", "Qatar"), ("12", "24/06 13h", "Suiza", "Canadá")],
-        "GRUPO C": [("13", "13/06 16h", "Brasil", "Marruecos"), ("14", "14/06 19h", "Haití", "Escocia"), ("15", "19/06 16h", "Escocia", "Marruecos"), ("16", "20/06 19h", "Brasil", "Haití"), ("17", "24/06 16h", "Marruecos", "Haití"), ("18", "24/06 16h", "Escocia", "Brasil")],
-        "GRUPO D": [("19", "13/06 19h", "EE.UU.", "Paraguay"), ("20", "14/06 22h", "Australia", "Turquía"), ("21", "19/06 13h", "EE.UU.", "Australia"), ("22", "20/06 22h", "Turquía", "Paraguay"), ("23", "26/06 20h", "Paraguay", "Australia"), ("24", "26/06 20h", "Turquía", "EE.UU.")],
-        "GRUPO E": [("25", "14/06 11h", "Alemania", "Curazao"), ("26", "15/06 17h", "Costa de Marfil", "Ecuador"), ("27", "20/06 14h", "Alemania", "Costa de Marfil"), ("28", "21/06 18h", "Ecuador", "Curazao"), ("29", "25/06 14h", "Curazao", "Costa de Marfil"), ("30", "25/06 14h", "Ecuador", "Alemania")],
-        "GRUPO F": [("31", "14/06 14h", "Países Bajos", "Japón"), ("32", "15/06 20h", "Suecia", "Túnez"), ("33", "20/06 11h", "Países Bajos", "Suecia"), ("34", "21/06 22h", "Túnez", "Japón"), ("35", "26/06 17h", "Japón", "Suecia"), ("36", "26/06 17h", "Túnez", "Países Bajos")],
-        "GRUPO G": [("37", "15/06 13h", "Bélgica", "Egipto"), ("38", "16/06 19h", "Irán", "Nueva Zelanda"), ("39", "21/06 13h", "Bélgica", "Irán"), ("40", "22/06 19h", "Nueva Zelanda", "Egipto"), ("41", "27/06 21h", "Egipto", "Irán"), ("42", "27/06 21h", "Nueva Zelanda", "Bélgica")],
-        "GRUPO H": [("43", "15/06 10h", "España", "Cabo Verde"), ("44", "15/06 16h", "Arabia Saudita", "Uruguay"), ("45", "21/06 10h", "España", "Arabia Saudita"), ("46", "21/06 16h", "Uruguay", "Cabo Verde"), ("47", "27/06 18h", "Cabo Verde", "Arabia Saudita"), ("48", "27/06 18h", "Uruguay", "España")],
-        "GRUPO I": [("49", "16/06 13h", "Francia", "Senegal"), ("50", "16/06 16h", "Irak", "Noruega"), ("51", "22/06 15h", "Francia", "Irak"), ("52", "23/06 18h", "Noruega", "Senegal"), ("53", "26/06 13h", "Noruega", "Francia"), ("54", "26/06 13h", "Senegal", "Irak")],
-        "GRUPO J": [("55", "17/06 19h", "Argentina", "Argelia"), ("56", "17/06 22h", "Austria", "Jordania"), ("57", "22/06 11h", "Argentina", "Austria"), ("58", "23/06 21h", "Jordania", "Argelia"), ("59", "28/06 20h", "Argelia", "Austria"), ("60", "28/06 20h", "Jordania", "Argentina")],
-        "GRUPO K": [("61", "17/06 11h", "Portugal", "RD Congo"), ("62", "18/06 20h", "Uzbekistán", "Colombia"), ("63", "23/06 11h", "Portugal", "Uzbekistán"), ("64", "24/06 20h", "Colombia", "RD Congo"), ("65", "28/06 17h", "Colombia", "Portugal"), ("66", "28/06 17h", "RD Congo", "Uzbekistán")],
-        "GRUPO L": [("67", "17/06 14h", "Inglaterra", "Croacia"), ("68", "18/06 17h", "Ghana", "Panamá"), ("69", "23/06 14h", "Inglaterra", "Ghana"), ("70", "24/06 17h", "Panamá", "Croacia"), ("71", "27/06 15h", "Croacia", "Ghana"), ("72", "27/06 15h", "Panamá", "Inglaterra")]
+        "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
+        "GRUPO B": [("07", "12/06 13:00", "Canadá", "Bosnia-Herzegovina"), ("08", "13/06 13:00", "Qatar", "Suiza"), ("09", "18/06 13:00", "Suiza", "Bosnia-Herzegovina"), ("10", "18/06 16:00", "Canadá", "Qatar"), ("11", "24/06 13:00", "Bosnia-Herzegovina", "Qatar"), ("12", "24/06 13:00", "Suiza", "Canadá")],
+        "GRUPO C": [("13", "13/06 16:00", "Brasil", "Marruecos"), ("14", "14/06 19:00", "Haití", "Escocia"), ("15", "19/06 16:00", "Escocia", "Marruecos"), ("16", "20/06 19:00", "Brasil", "Haití"), ("17", "24/06 16:00", "Marruecos", "Haití"), ("18", "24/06 16:00", "Escocia", "Brasil")],
+        "GRUPO D": [("19", "13/06 19:00", "EE.UU.", "Paraguay"), ("20", "14/06 22:00", "Australia", "Turquía"), ("21", "19/06 13:00", "EE.UU.", "Australia"), ("22", "20/06 22:00", "Turquía", "Paraguay"), ("23", "26/06 20:00", "Paraguay", "Australia"), ("24", "26/06 20:00", "Turquía", "EE.UU.")],
+        "GRUPO E": [("25", "14/06 11:00", "Alemania", "Curazao"), ("26", "15/06 17:00", "Costa de Marfil", "Ecuador"), ("27", "20/06 14:00", "Alemania", "Costa de Marfil"), ("28", "21/06 18:00", "Ecuador", "Curazao"), ("29", "25/06 14:00", "Curazao", "Costa de Marfil"), ("30", "25/06 14:00", "Ecuador", "Alemania")],
+        "GRUPO F": [("31", "14/06 14:00", "Países Bajos", "Japón"), ("32", "15/06 20:00", "Suecia", "Túnez"), ("33", "20/06 11:00", "Países Bajos", "Suecia"), ("34", "21/06 22:00", "Túnez", "Japón"), ("35", "26/06 17:00", "Japón", "Suecia"), ("36", "26/06 17:00", "Túnez", "Países Bajos")],
+        "GRUPO G": [("37", "15/06 13:00", "Bélgica", "Egipto"), ("38", "16/06 19:00", "Irán", "Nueva Zelanda"), ("39", "21/06 13:00", "Bélgica", "Irán"), ("40", "22/06 19:00", "Nueva Zelanda", "Egipto"), ("41", "27/06 21:00", "Egipto", "Irán"), ("42", "27/06 21:00", "Nueva Zelanda", "Bélgica")],
+        "GRUPO H": [("43", "15/06 10:00", "España", "Cabo Verde"), ("44", "15/06 16:00", "Arabia Saudita", "Uruguay"), ("45", "21/06 10:00", "España", "Arabia Saudita"), ("46", "21/06 16:00", "Uruguay", "Cabo Verde"), ("47", "27/06 18:00", "Cabo Verde", "Arabia Saudita"), ("48", "27/06 18:00", "Uruguay", "España")],
+        "GRUPO I": [("49", "16/06 13:00", "Francia", "Senegal"), ("50", "16/06 16:00", "Irak", "Noruega"), ("51", "22/06 15:00", "Francia", "Irak"), ("52", "23/06 18:00", "Noruega", "Senegal"), ("53", "26/06 13:00", "Noruega", "Francia"), ("54", "26/06 13:00", "Senegal", "Irak")],
+        "GRUPO J": [("55", "17/06 19:00", "Argentina", "Argelia"), ("56", "17/06 22:00", "Austria", "Jordania"), ("57", "22/06 11:00", "Argentina", "Austria"), ("58", "23/06 21:00", "Jordania", "Argelia"), ("59", "28/06 20:00", "Argelia", "Austria"), ("60", "28/06 20:00", "Jordania", "Argentina")],
+        "GRUPO K": [("61", "17/06 11:00", "Portugal", "RD Congo"), ("62", "18/06 20:00", "Uzbekistán", "Colombia"), ("63", "23/06 11:00", "Portugal", "Uzbekistán"), ("64", "24/06 20:00", "Colombia", "RD Congo"), ("65", "28/06 17:30", "Colombia", "Portugal"), ("66", "28/06 17:30", "RD Congo", "Uzbekistán")],
+        "GRUPO L": [("67", "17/06 14:00", "Inglaterra", "Croacia"), ("68", "18/06 17:00", "Ghana", "Panamá"), ("69", "23/06 14:00", "Inglaterra", "Ghana"), ("70", "24/06 17:00", "Panamá", "Croacia"), ("71", "27/06 15:00", "Croacia", "Ghana"), ("72", "27/06 15:00", "Panamá", "Inglaterra")]
     }
 
 calendario = obtener_calendario()
 pronosticos = {}
 
-# Generación dinámica usando Expanders
-for grupo, partidos in calendario.items():
-    with st.expander(f"📌 {grupo}"): # Esta es la función de contraer/desplegar
-        for p in partidos:
-            cols = st.columns([3, 2, 1, 2, 3])
-            cols[0].write(f"P{p[0]} | {p[1]}")
-            cols[1].write(f"**{p[2]}**")
-            loc = cols[2].number_input("L", key=f"l{p[0]}", min_value=0, label_visibility="collapsed")
+for grupo, juegos in calendario.items():
+    with st.expander(grupo): # Función de contraer/desplegar aplicada
+        for juego in juegos:
+            cols = st.columns([4, 2, 1, 2, 4])
+            cols[0].write(f"P{juego[0]} | {juego[1]}")
+            cols[1].write(f"**{juego[2]}**")
+            loc = cols[2].number_input("L", min_value=0, key=f"l{juego[0]}", label_visibility="collapsed")
             cols[2].markdown('<div class="vs-text">vs</div>', unsafe_allow_html=True)
-            vis = cols[3].number_input("V", key=f"v{p[0]}", min_value=0, label_visibility="collapsed")
-            cols[4].write(f"**{p[3]}**")
-            pronosticos[p[0]] = {"local": loc, "visitante": vis}
+            vis = cols[3].number_input("V", min_value=0, key=f"v{juego[0]}", label_visibility="collapsed")
+            cols[4].write(f"**{juego[3]}**")
+            pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-if st.button("💾 GUARDAR Y FINALIZAR"):
+if st.button("💾 GUARDAR"):
     if nombre:
-        data = {"participante": nombre, "pronosticos": pronosticos}
-        st.download_button("📥 Descargar JSON", json.dumps(data), f"Quiniela_{nombre.replace(' ', '_')}.json")
-        st.success("¡Pronósticos capturados! Presiona Ctrl+P para guardar como PDF.")
+        data_final = {"participante": nombre, "pronosticos": pronosticos}
+        st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
     else:
-        st.error("Por favor, ingresa tu nombre.")
+        st.error("Ingresa tu nombre.")
