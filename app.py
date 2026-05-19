@@ -5,7 +5,7 @@ from fpdf import FPDF
 # Configuración base intacta
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS Quirúrgico: Centrado absoluto del "vs" abajo en el medio de los dos recuadros
+# CSS QUIRÚRGICO: Ajuste de alineación vertical y posición del VS
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
@@ -13,65 +13,67 @@ st.markdown("""
     /* Forzar color blanco en el texto del input de nombre */
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     
-    /* Contenedor principal de la confrontación */
-    .contenedor-partido {
+    /* MODIFICACIÓN: Contenedor unificado para alineación vertical perfecta */
+    .partido-completo {
         display: flex;
-        align-items: center;
+        align-items: center; /* Centrado vertical absoluto */
         justify-content: center;
+        gap: 10px; /* Separación horizontal entre elementos */
         width: 100%;
     }
     
-    /* Bloque central que une las dos casillas */
-    .bloque-marcador {
+    /* Bloque central que une las dos casillas con el VS abajo */
+    .bloque-marcador-vs {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-width: 180px; /* Espacio fijo garantizado para las cajas y el vs */
+        min-width: 160px; /* Espacio fijo para el marcador */
     }
     
-    /* Fila superior donde se alinean los inputs numéricos */
+    /* Fila superior para los inputs numéricos */
     .fila-inputs {
         display: flex;
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        gap: 20px; /* Separación horizontal fija entre recuadros */
+        gap: 15px; /* Separación entre cajas */
     }
     
-    /* CORRECCIÓN: El "vs" en el centro exacto debajo del espacio de las dos casillas */
-    .vs-centro-abajo {
+    /* AJUSTE: El "vs" en el centro exacto, pero más arriba */
+    .vs-centro-ajustado {
         color: #ffbc42;
         font-weight: bold;
         text-align: center;
-        margin-top: 8px; /* Lo empuja abajo en el medio exacto */
+        margin-top: 3px; /* MODIFICADO: Subido un poco más arriba */
         font-size: 14px;
+        line-height: 1; /* Evita espaciado extra */
     }
     
     /* Forzar tamaño idéntico y centrado de números en las casillas */
     div[data-testid="stNumberInput"] {
-        width: 75px !important;
+        width: 70px !important;
     }
     div[data-testid="stNumberInput"] input {
         text-align: center !important;
-        width: 75px !important;
+        width: 70px !important;
     }
     
-    /* Nombres de los equipos con ancho fijo para evitar que pisen las cajas */
-    .equipo-local {
+    /* Nombres de los equipos: Alineados y con ancho fijo */
+    .nombre-equipo-local {
         text-align: right;
         font-weight: bold;
         color: white;
-        width: 150px;
-        padding-right: 15px;
+        width: 140px; /* Ancho fijo para consistencia visual */
+        white-space: nowrap; /* Evita saltos de línea */
     }
     
-    .equipo-visitante {
+    .nombre-equipo-visitante {
         text-align: left;
         font-weight: bold;
         color: white;
-        width: 150px;
-        padding-left: 15px;
+        width: 140px; /* Ancho fijo para consistencia visual */
+        white-space: nowrap; /* Evita saltos de línea */
     }
     
     h2 {color: #ffbc42 !important;}
@@ -81,6 +83,7 @@ st.markdown("""
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 nombre = st.text_input("Nombre Completo del Participante:")
 
+# [Calendario maestro mantenido idéntico con todos los grupos]
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
@@ -111,39 +114,47 @@ def generar_pdf(nombre_u, data_p):
 calendario = obtener_calendario()
 pronosticos = {}
 
+# Interfaz: Mantenemos la estructura de columnas original para la fecha y el partido
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            # Estructura limpia de 3 columnas para evitar desbordamientos
-            cols = st.columns([2.5, 7.5, 0.5])
+            cols = st.columns([2.5, 7.5]) # Fecha/Hora | Bloque del Partido
             
             # Datos del partido
             cols[0].write(f"P{juego[0]} | {juego[1]}")
             
-            # Bloque de confrontación
+            # Bloque de confrontación con la NUEVA ALINEACIÓN VERTICAL CORREGIDA
             with cols[1]:
-                # Creamos la fila para la alineación del partido completo
-                sub_cols = st.columns([3.5, 5, 3.5])
+                # Contenedor principal flex para centrar todo verticalmente
+                st.markdown('<div class="partido-completo">', unsafe_allow_html=True)
+                
+                # Usamos st.columns internos para equilibrar los nombres y el marcador,
+                # pero los envolvemos en divs CSS para el centrado vertical.
+                sub_cols = st.columns([3, 4, 3])
                 
                 # Nombre del equipo local
-                sub_cols[0].markdown(f"<div class='equipo-local'>{juego[2]}</div>", unsafe_allow_html=True)
+                with sub_cols[0]:
+                    st.markdown(f"<div class='nombre-equipo-local'>{juego[2]}</div>", unsafe_allow_html=True)
                 
-                # Bloque central unificado para las cajas y el vs abajo
+                # Bloque central unificado para las cajas y el vs abajo (un poco más arriba)
                 with sub_cols[1]:
-                    st.markdown('<div class="bloque-marcador"><div class="fila-inputs">', unsafe_allow_html=True)
+                    st.markdown('<div class="bloque-marcador-vs"><div class="fila-inputs">', unsafe_allow_html=True)
                     
-                    # Generamos ambos inputs uno al lado del otro
                     caja_izq, caja_der = st.columns(2)
                     with caja_izq:
                         loc = st.number_input("L", min_value=0, key=f"l{juego[0]}", label_visibility="collapsed")
                     with caja_der:
                         vis = st.number_input("V", min_value=0, key=f"v{juego[0]}", label_visibility="collapsed")
                     
-                    # Colocamos el texto "vs" abajo, centrado exactamente en el medio de la separación
-                    st.markdown('</div><p class="vs-centro-abajo">vs</p></div>', unsafe_allow_html=True)
+                    # Colocamos el texto "vs" abajo, con el nuevo espaciado corregido
+                    st.markdown('</div><p class="vs-centro-ajustado">vs</p></div>', unsafe_allow_html=True)
                 
                 # Nombre del equipo visitante
-                sub_cols[2].markdown(f"<div class='equipo-visitante'>{juego[3]}</div>", unsafe_allow_html=True)
+                with sub_cols[2]:
+                    st.markdown(f"<div class='nombre-equipo-visitante'>{juego[3]}</div>", unsafe_allow_html=True)
+                
+                # Cierre del contenedor flex principal
+                st.markdown('</div>', unsafe_allow_html=True)
             
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
