@@ -10,7 +10,7 @@ st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
     
-    /* MODIFICACIÓN: Texto de la etiqueta del input en blanco nítido y más grande */
+    /* Texto de la etiqueta del input en blanco nítido y destacado */
     div[data-testid="stTextInput"] label p {
         color: #ffffff !important;
         font-size: 16px !important;
@@ -86,7 +86,9 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre Completo del Participante:")
+
+# Ajuste de etiqueta: Solo "Nombre del Participante:"
+nombre = st.text_input("Nombre del Participante:")
 
 def obtener_calendario():
     return {
@@ -129,16 +131,16 @@ for grupo, juegos in calendario.items():
             # Columna 2: País Local
             cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
             
-            # Columna 3: Marcador Local
+            # Columna 3: Marcador Local (Inicia en 0 por defecto)
             with cols[2]:
-                loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
+                loc = st.number_input("L", min_value=0, value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
             
             # Columna 4: Separador "vs"
             cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
             
-            # Columna 5: Marcador Visitante
+            # Columna 5: Marcador Visitante (Inicia en 0 por defecto)
             with cols[4]:
-                vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
+                vis = st.number_input("V", min_value=0, value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
             
             # Columna 6: País Visitante
             cols[5].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
