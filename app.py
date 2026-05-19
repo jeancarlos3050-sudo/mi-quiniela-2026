@@ -10,6 +10,8 @@ st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
+    /* Ajuste para que la etiqueta del input sea blanca y visible */
+    div[data-testid="stTextInput"] label {color: white !important; font-weight: bold !important;}
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     div[data-testid="stColumn"] {display: flex; align-items: center; justify-content: center;}
     div[data-testid="stNumberInput"] {width: 70px !important; margin: 0 auto !important;}
@@ -23,10 +25,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
-nombre = st.text_input("Nombre Completo del Participante:")
+# Ajuste quirúrgico: Texto simplificado y visible mediante CSS
+nombre = st.text_input("Nombre del participante:")
 
 def obtener_calendario():
-    # Ajuste: Se añade la fecha y hora a cada tupla del calendario
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
         "GRUPO B": [("07", "12/06 13:00", "Canadá", "Bosnia"), ("08", "13/06 13:00", "Qatar", "Suiza"), ("09", "18/06 13:00", "Suiza", "Bosnia"), ("10", "18/06 16:00", "Canadá", "Qatar"), ("11", "24/06 13:00", "Bosnia", "Qatar"), ("12", "24/06 13:00", "Suiza", "Canadá")],
@@ -42,7 +44,6 @@ def obtener_calendario():
         "GRUPO L": [("67", "17/06 14:00", "Inglaterra", "Croacia"), ("68", "18/06 17:00", "Ghana", "Panamá"), ("69", "23/06 14:00", "Inglaterra", "Ghana"), ("70", "24/06 17:00", "Panamá", "Croacia"), ("71", "27/06 15:00", "Croacia", "Ghana"), ("72", "27/06 15:00", "Panamá", "Inglaterra")]
     }
 
-# --- FUNCIÓN PDF CON FECHA Y HORA ---
 def generar_pdf(nombre_u, data_p, cal):
     fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
     pdf = FPDF()
@@ -53,7 +54,6 @@ def generar_pdf(nombre_u, data_p, cal):
     pdf.cell(190, 10, txt=f"Fecha y hora de generación: {fecha_actual}", ln=True, align='C')
     pdf.ln(5)
     
-    # Encabezado de tabla
     pdf.set_font("Arial", 'B', 11)
     pdf.set_fill_color(220, 220, 220)
     pdf.cell(15, 10, "ID", border=1, fill=True, align='C')
@@ -63,7 +63,6 @@ def generar_pdf(nombre_u, data_p, cal):
     pdf.cell(60, 10, "Visitante", border=1, fill=True)
     pdf.ln()
     
-    # Datos
     pdf.set_font("Arial", size=10)
     for grupo, juegos in cal.items():
         pdf.set_font("Arial", 'B', 11)
@@ -88,14 +87,14 @@ for grupo, juegos in calendario.items():
         for juego in juegos:
             cols = st.columns([1, 2, 2.5, 1.2, 0.6, 1.2, 2.5])
             cols[0].markdown(f"P{juego[0]}")
-            cols[1].markdown(f"*{juego[1]}*") # Visualización fecha/hora en la web
-            cols[2].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_allow_html=True)
+            cols[1].markdown(f"*{juego[1]}*")
+            cols[2].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
             with cols[3]:
                 loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            cols[4].markdown('<p class="vs-texto">vs</p>', unsafe_allow_html=True)
+            cols[4].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
             with cols[5]:
                 vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            cols[6].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_allow_html=True)
+            cols[6].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
