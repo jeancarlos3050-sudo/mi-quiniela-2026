@@ -6,14 +6,16 @@ from datetime import datetime
 # Configuración base
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS para alineación y colores
+# CSS: Manteniendo el diseño original solicitado
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
-    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center;}
-    .team-local {text-align: right; font-weight: bold; padding-right: 10px;}
-    .team-visitante {text-align: left; font-weight: bold; padding-left: 10px;}
+    div[data-testid="stNumberInput"] {width: 60px !important; margin: 0 auto !important;}
+    div[data-testid="stNumberInput"] input {text-align: center !important; font-weight: bold;}
+    .vs-texto {color: #ffbc42 !important; font-weight: bold; font-size: 16px; text-align: center; padding-top: 25px;}
+    .team-local {text-align: right; font-weight: bold; padding-top: 25px;}
+    .team-visitante {text-align: left; font-weight: bold; padding-top: 25px;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -45,7 +47,7 @@ def generar_pdf(nombre_u, data_p, cal):
     pdf.cell(190, 5, txt=f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", ln=True, align='C')
     pdf.ln(5)
     
-    # Anchos proporcionales
+    # Anchos calculados para 190 total
     w_id, w_f, w_loc, w_pr, w_vis = 10, 30, 60, 20, 70
     pdf.set_font("Arial", 'B', 10)
     pdf.set_fill_color(220, 220, 220)
@@ -75,16 +77,20 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for j in juegos:
-            cols = st.columns([0.5, 1.5, 2, 0.8, 0.8, 2])
-            cols[0].write(f"P{j[0]}")
-            cols[1].write(j[1])
-            cols[2].write(j[2])
-            pronosticos[j[0]] = {
-                "local": cols[3].number_input("L", 0, None, 0, key=f"l{j[0]}", label_visibility="collapsed"),
-                "visitante": cols[4].number_input("V", 0, None, 0, key=f"v{j[0]}", label_visibility="collapsed")
-            }
-            cols[5].write(j[3])
+            cols = st.columns([1, 2, 2.5, 1, 1, 2.5])
+            cols[0].markdown(f"**P{j[0]}**")
+            cols[1].markdown(f"*{j[1]}*")
+            cols[2].markdown(f'<div class="team-local">{j[2]}</div>', unsafe_html=True)
+            loc = cols[3].number_input("L", 0, None, 0, key=f"l{j[0]}", label_visibility="collapsed")
+            vis = cols[4].number_input("V", 0, None, 0, key=f"v{j[0]}", label_visibility="collapsed")
+            cols[5].markdown(f'<div class="team-visitante">{j[3]}</div>', unsafe_html=True)
+            pronosticos[j[0]] = {"local": loc, "visitante": vis}
 
 st.write("---")
-if nombre and st.button("📄 GENERAR PDF"):
-    st.download_button("📥 Descargar PDF", generar_pdf(nombre, pronosticos, calendario), f"Quiniela_{nombre}.pdf", "application/pdf")
+c1, c2 = st.columns(2)
+if c1.button("💾 GUARDAR JSON"):
+    if nombre:
+        st.download_button("📥 Descargar JSON", json.dumps({"participante": nombre, "datos": pronosticos}), f"Quiniela_{nombre.replace(' ', '_')}.json")
+if c2.button("📄 GENERAR PDF"):
+    if nombre:
+        st.download_button("📥 Descargar PDF", generar_pdf(nombre, pronosticos, calendario), f"Quiniela_{nombre.replace(' ', '_')}.pdf", "application/pdf")
