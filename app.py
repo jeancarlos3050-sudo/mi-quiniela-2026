@@ -1,5 +1,6 @@
 import streamlit as st
 import json
+from fpdf import FPDF
 
 # Configuración de la página
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
@@ -117,7 +118,17 @@ def obtener_calendario():
         ]
     }
 
-# Lógica de visualización
+def generar_pdf(nombre_u, data_p):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
+    pdf.set_font("Arial", size=11)
+    pdf.ln(10)
+    for id_p, res in data_p.items():
+        pdf.cell(200, 8, txt=f"Partido {id_p}: {res['local']} - {res['visitante']}", ln=True)
+    return pdf.output(dest='S').encode('latin-1')
+
 calendario = obtener_calendario()
 pronosticos = {}
 
@@ -133,7 +144,16 @@ for grupo, juegos in calendario.items():
         cols[4].write(f"**{juego['visitante']}**")
         pronosticos[juego['#']] = {"local": loc, "visitante": vis}
 
-if st.button("💾 GUARDAR PRONÓSTICOS"):
-    if nombre:
-        data = {"participante": nombre, "pronosticos": pronosticos}
-        st.download_button("📥 Descargar JSON", json.dumps(data), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+c1, c2 = st.columns(2)
+with c1:
+    if st.button("💾 GUARDAR JSON"):
+        if nombre:
+            data_final = {"participante": nombre, "pronosticos": pronosticos}
+            st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+with c2:
+    if st.button("📄 GENERAR PDF"):
+        if nombre:
+            pdf_bytes = generar_pdf(nombre, pronosticos)
+            st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
+        else:
+            st.error("¡Ingresa tu nombre primero!")
