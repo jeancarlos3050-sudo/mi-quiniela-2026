@@ -1,55 +1,159 @@
 import streamlit as st
 import json
+from fpdf import FPDF
 
-st.set_page_config(page_title="Quiniela Mundial 2026", layout="wide")
+# Configuración de la página
+st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
+# Estilos CSS
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
-    .grupo-card {background-color: #16213e; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #4a5d7e;}
-    .vs-text {text-align: center; font-weight: bold; color: #ffbc42; padding-top: 10px;}
+    .partido-box {background-color: #1c2541; padding: 10px; border-radius: 5px; margin-bottom: 8px; border: 1px solid #3a506b;}
+    div[data-testid="stNumberInput"] {width: 60px !important;}
     h2 {color: #ffbc42 !important;}
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🏆 MUNDIAL 2026: FORMULARIO COMPLETO")
+st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 nombre = st.text_input("Nombre Completo del Participante:")
 
-# Diccionario completo con los 72 partidos
-data = {
-    "GRUPO A": [("01", "11/06 13h", "México", "Sudáfrica"), ("02", "12/06 20h", "Corea del Sur", "Chequia"), ("03", "18/06 10h", "Chequia", "Sudáfrica"), ("04", "19/06 19h", "México", "Corea del Sur"), ("05", "25/06 19h", "Chequia", "México"), ("06", "25/06 19h", "Sudáfrica", "Corea del Sur")],
-    "GRUPO B": [("07", "12/06 13h", "Canadá", "Bosnia-Herzegovina"), ("08", "13/06 13h", "Qatar", "Suiza"), ("09", "18/06 13h", "Suiza", "Bosnia-Herzegovina"), ("10", "18/06 16h", "Canadá", "Qatar"), ("11", "24/06 13h", "Bosnia-Herzegovina", "Qatar"), ("12", "24/06 13h", "Suiza", "Canadá")],
-    "GRUPO C": [("13", "13/06 16h", "Brasil", "Marruecos"), ("14", "14/06 19h", "Haití", "Escocia"), ("15", "19/06 16h", "Escocia", "Marruecos"), ("16", "20/06 19h", "Brasil", "Haití"), ("17", "24/06 16h", "Marruecos", "Haití"), ("18", "24/06 16h", "Escocia", "Brasil")],
-    "GRUPO D": [("19", "13/06 19h", "EE.UU.", "Paraguay"), ("20", "14/06 22h", "Australia", "Turquía"), ("21", "19/06 13h", "EE.UU.", "Australia"), ("22", "20/06 22h", "Turquía", "Paraguay"), ("23", "26/06 20h", "Paraguay", "Australia"), ("24", "26/06 20h", "Turquía", "EE.UU.")],
-    "GRUPO E": [("25", "14/06 11h", "Alemania", "Curazao"), ("26", "15/06 17h", "Costa de Marfil", "Ecuador"), ("27", "20/06 14h", "Alemania", "Costa de Marfil"), ("28", "21/06 18h", "Ecuador", "Curazao"), ("29", "25/06 14h", "Curazao", "Costa de Marfil"), ("30", "25/06 14h", "Ecuador", "Alemania")],
-    "GRUPO F": [("31", "14/06 14h", "Países Bajos", "Japón"), ("32", "15/06 20h", "Suecia", "Túnez"), ("33", "20/06 11h", "Países Bajos", "Suecia"), ("34", "21/06 22h", "Túnez", "Japón"), ("35", "26/06 17h", "Japón", "Suecia"), ("36", "26/06 17h", "Túnez", "Países Bajos")],
-    "GRUPO G": [("37", "15/06 13h", "Bélgica", "Egipto"), ("38", "16/06 19h", "Irán", "Nueva Zelanda"), ("39", "21/06 13h", "Bélgica", "Irán"), ("40", "22/06 19h", "Nueva Zelanda", "Egipto"), ("41", "27/06 21h", "Egipto", "Irán"), ("42", "27/06 21h", "Nueva Zelanda", "Bélgica")],
-    "GRUPO H": [("43", "15/06 10h", "España", "Cabo Verde"), ("44", "15/06 16h", "Arabia Saudita", "Uruguay"), ("45", "21/06 10h", "España", "Arabia Saudita"), ("46", "21/06 16h", "Uruguay", "Cabo Verde"), ("47", "27/06 18h", "Cabo Verde", "Arabia Saudita"), ("48", "27/06 18h", "Uruguay", "España")],
-    "GRUPO I": [("49", "16/06 13h", "Francia", "Senegal"), ("50", "16/06 16h", "Irak", "Noruega"), ("51", "22/06 15h", "Francia", "Irak"), ("52", "23/06 18h", "Noruega", "Senegal"), ("53", "26/06 13h", "Noruega", "Francia"), ("54", "26/06 13h", "Senegal", "Irak")],
-    "GRUPO J": [("55", "17/06 19h", "Argentina", "Argelia"), ("56", "17/06 22h", "Austria", "Jordania"), ("57", "22/06 11h", "Argentina", "Austria"), ("58", "23/06 21h", "Jordania", "Argelia"), ("59", "28/06 20h", "Argelia", "Austria"), ("60", "28/06 20h", "Jordania", "Argentina")],
-    "GRUPO K": [("61", "17/06 11h", "Portugal", "RD Congo"), ("62", "18/06 20h", "Uzbekistán", "Colombia"), ("63", "23/06 11h", "Portugal", "Uzbekistán"), ("64", "24/06 20h", "Colombia", "RD Congo"), ("65", "28/06 17h", "Colombia", "Portugal"), ("66", "28/06 17h", "RD Congo", "Uzbekistán")],
-    "GRUPO L": [("67", "17/06 14h", "Inglaterra", "Croacia"), ("68", "18/06 17h", "Ghana", "Panamá"), ("69", "23/06 14h", "Inglaterra", "Ghana"), ("70", "24/06 17h", "Panamá", "Croacia"), ("71", "27/06 15h", "Croacia", "Ghana"), ("72", "27/06 15h", "Panamá", "Inglaterra")]
-}
+def obtener_calendario():
+    return {
+        "GRUPO A": [
+            {"#": "01", "hora": "11/06 13:00", "local": "México", "visitante": "Sudáfrica"},
+            {"#": "02", "hora": "11/06 20:00", "local": "Corea del Sur", "visitante": "Chequia"},
+            {"#": "03", "hora": "18/06 19:00", "local": "México", "visitante": "Corea del Sur"},
+            {"#": "04", "hora": "18/06 12:00", "local": "Chequia", "visitante": "Sudáfrica"},
+            {"#": "05", "hora": "24/06 22:00", "local": "México", "visitante": "Chequia"},
+            {"#": "06", "hora": "24/06 22:00", "local": "Sudáfrica", "visitante": "Corea del Sur"}
+        ],
+        "GRUPO B": [
+            {"#": "07", "hora": "12/06 13:00", "local": "Canadá", "visitante": "Bosnia-Herzegovina"},
+            {"#": "08", "hora": "13/06 13:00", "local": "Qatar", "visitante": "Suiza"},
+            {"#": "09", "hora": "18/06 13:00", "local": "Suiza", "visitante": "Bosnia-Herzegovina"},
+            {"#": "10", "hora": "18/06 16:00", "local": "Canadá", "visitante": "Qatar"},
+            {"#": "11", "hora": "24/06 13:00", "local": "Bosnia-Herzegovina", "visitante": "Qatar"},
+            {"#": "12", "hora": "24/06 13:00", "local": "Suiza", "visitante": "Canadá"}
+        ],
+        "GRUPO C": [
+            {"#": "13", "hora": "13/06 16:00", "local": "Brasil", "visitante": "Marruecos"},
+            {"#": "14", "hora": "14/06 19:00", "local": "Haití", "visitante": "Escocia"},
+            {"#": "15", "hora": "19/06 16:00", "local": "Escocia", "visitante": "Marruecos"},
+            {"#": "16", "hora": "20/06 19:00", "local": "Brasil", "visitante": "Haití"},
+            {"#": "17", "hora": "24/06 16:00", "local": "Marruecos", "visitante": "Haití"},
+            {"#": "18", "hora": "24/06 16:00", "local": "Escocia", "visitante": "Brasil"}
+        ],
+        "GRUPO D": [
+            {"#": "19", "hora": "13/06 19:00", "local": "EE.UU.", "visitante": "Paraguay"},
+            {"#": "20", "hora": "14/06 22:00", "local": "Australia", "visitante": "Turquía"},
+            {"#": "21", "hora": "19/06 13:00", "local": "EE.UU.", "visitante": "Australia"},
+            {"#": "22", "hora": "20/06 22:00", "local": "Turquía", "visitante": "Paraguay"},
+            {"#": "23", "hora": "26/06 20:00", "local": "Paraguay", "visitante": "Australia"},
+            {"#": "24", "hora": "26/06 20:00", "local": "Turquía", "visitante": "EE.UU."}
+        ],
+        "GRUPO E": [
+            {"#": "25", "hora": "14/06 11:00", "local": "Alemania", "visitante": "Curazao"},
+            {"#": "26", "hora": "15/06 17:00", "local": "Costa de Marfil", "visitante": "Ecuador"},
+            {"#": "27", "hora": "20/06 14:00", "local": "Alemania", "visitante": "Costa de Marfil"},
+            {"#": "28", "hora": "21/06 18:00", "local": "Ecuador", "visitante": "Curazao"},
+            {"#": "29", "hora": "25/06 14:00", "local": "Curazao", "visitante": "Costa de Marfil"},
+            {"#": "30", "hora": "25/06 14:00", "local": "Ecuador", "visitante": "Alemania"}
+        ],
+        "GRUPO F": [
+            {"#": "31", "hora": "14/06 14:00", "local": "Países Bajos", "visitante": "Japón"},
+            {"#": "32", "hora": "15/06 20:00", "local": "Suecia", "visitante": "Túnez"},
+            {"#": "33", "hora": "20/06 11:00", "local": "Países Bajos", "visitante": "Suecia"},
+            {"#": "34", "hora": "21/06 22:00", "local": "Túnez", "visitante": "Japón"},
+            {"#": "35", "hora": "26/06 17:00", "local": "Japón", "visitante": "Suecia"},
+            {"#": "36", "hora": "26/06 17:00", "local": "Túnez", "visitante": "Países Bajos"}
+        ],
+        "GRUPO G": [
+            {"#": "37", "hora": "15/06 13:00", "local": "Bélgica", "visitante": "Egipto"},
+            {"#": "38", "hora": "16/06 19:00", "local": "Irán", "visitante": "Nueva Zelanda"},
+            {"#": "39", "hora": "21/06 13:00", "local": "Bélgica", "visitante": "Irán"},
+            {"#": "40", "hora": "22/06 19:00", "local": "Nueva Zelanda", "visitante": "Egipto"},
+            {"#": "41", "hora": "27/06 21:00", "local": "Egipto", "visitante": "Irán"},
+            {"#": "42", "hora": "27/06 21:00", "local": "Nueva Zelanda", "visitante": "Bélgica"}
+        ],
+        "GRUPO H": [
+            {"#": "43", "hora": "15/06 10:00", "local": "España", "visitante": "Cabo Verde"},
+            {"#": "44", "hora": "15/06 16:00", "local": "Arabia Saudita", "visitante": "Uruguay"},
+            {"#": "45", "hora": "21/06 10:00", "local": "España", "visitante": "Arabia Saudita"},
+            {"#": "46", "hora": "21/06 16:00", "local": "Uruguay", "visitante": "Cabo Verde"},
+            {"#": "47", "hora": "27/06 18:00", "local": "Cabo Verde", "visitante": "Arabia Saudita"},
+            {"#": "48", "hora": "27/06 18:00", "local": "Uruguay", "visitante": "España"}
+        ],
+        "GRUPO I": [
+            {"#": "49", "hora": "16/06 13:00", "local": "Francia", "visitante": "Senegal"},
+            {"#": "50", "hora": "16/06 16:00", "local": "Irak", "visitante": "Noruega"},
+            {"#": "51", "hora": "22/06 15:00", "local": "Francia", "visitante": "Irak"},
+            {"#": "52", "hora": "23/06 18:00", "local": "Noruega", "visitante": "Senegal"},
+            {"#": "53", "hora": "26/06 13:00", "local": "Noruega", "visitante": "Francia"},
+            {"#": "54", "hora": "26/06 13:00", "local": "Senegal", "visitante": "Irak"}
+        ],
+        "GRUPO J": [
+            {"#": "55", "hora": "17/06 19:00", "local": "Argentina", "visitante": "Argelia"},
+            {"#": "56", "hora": "17/06 22:00", "local": "Austria", "visitante": "Jordania"},
+            {"#": "57", "hora": "22/06 11:00", "local": "Argentina", "visitante": "Austria"},
+            {"#": "58", "hora": "23/06 21:00", "local": "Jordania", "visitante": "Argelia"},
+            {"#": "59", "hora": "28/06 20:00", "local": "Argelia", "visitante": "Austria"},
+            {"#": "60", "hora": "28/06 20:00", "local": "Jordania", "visitante": "Argentina"}
+        ],
+        "GRUPO K": [
+            {"#": "61", "hora": "17/06 11:00", "local": "Portugal", "visitante": "RD Congo"},
+            {"#": "62", "hora": "18/06 20:00", "local": "Uzbekistán", "visitante": "Colombia"},
+            {"#": "63", "hora": "23/06 11:00", "local": "Portugal", "visitante": "Uzbekistán"},
+            {"#": "64", "hora": "24/06 20:00", "local": "Colombia", "visitante": "RD Congo"},
+            {"#": "65", "hora": "28/06 17:30", "local": "Colombia", "visitante": "Portugal"},
+            {"#": "66", "hora": "28/06 17:30", "local": "RD Congo", "visitante": "Uzbekistán"}
+        ],
+        "GRUPO L": [
+            {"#": "67", "hora": "17/06 14:00", "local": "Inglaterra", "visitante": "Croacia"},
+            {"#": "68", "hora": "18/06 17:00", "local": "Ghana", "visitante": "Panamá"},
+            {"#": "69", "hora": "23/06 14:00", "local": "Inglaterra", "visitante": "Ghana"},
+            {"#": "70", "hora": "24/06 17:00", "local": "Panamá", "visitante": "Croacia"},
+            {"#": "71", "hora": "27/06 15:00", "local": "Croacia", "visitante": "Ghana"},
+            {"#": "72", "hora": "27/06 15:00", "local": "Panamá", "visitante": "Inglaterra"}
+        ]
+    }
 
+def generar_pdf(nombre_u, data_p):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt=f"Quiniela Mundial 2026: {nombre_u}", ln=True, align='C')
+    pdf.set_font("Arial", size=11)
+    pdf.ln(10)
+    for id_p, res in data_p.items():
+        pdf.cell(200, 8, txt=f"Partido {id_p}: {res['local']} - {res['visitante']}", ln=True)
+    return pdf.output(dest='S').encode('latin-1')
+
+calendario = obtener_calendario()
 pronosticos = {}
 
-for g, partidos in data.items():
-    st.markdown(f'<div class="grupo-card"><h2>{g}</h2>', unsafe_allow_html=True)
-    for p in partidos:
-        c1, c2, c3, c4, c5 = st.columns([2, 2, 0.5, 2, 2])
-        c1.write(f"P{p[0]} | {p[1]}")
-        c2.write(f"**{p[2]}**")
-        loc = c3.number_input("L", key=f"l{p[0]}", label_visibility="collapsed")
-        c3.markdown('<div class="vs-text">vs</div>', unsafe_allow_html=True)
-        vis = c4.number_input("V", key=f"v{p[0]}", label_visibility="collapsed")
-        c5.write(f"**{p[3]}**")
-        pronosticos[p[0]] = {"local": loc, "visitante": vis}
-    st.markdown('</div>', unsafe_allow_html=True)
+for grupo, juegos in calendario.items():
+    st.subheader(grupo)
+    for juego in juegos:
+        cols = st.columns([4, 2, 1, 2, 4])
+        cols[0].write(f"P{juego['#']} | {juego['hora']}")
+        cols[1].write(f"**{juego['local']}**")
+        loc = cols[2].number_input("L", min_value=0, key=f"l{juego['#']}", label_visibility="collapsed")
+        cols[2].write("vs")
+        vis = cols[3].number_input("V", min_value=0, key=f"v{juego['#']}", label_visibility="collapsed")
+        cols[4].write(f"**{juego['visitante']}**")
+        pronosticos[juego['#']] = {"local": loc, "visitante": vis}
 
-if st.button("💾 GUARDAR PRONÓSTICOS"):
-    if nombre:
-        resultado = {"Participante": nombre, "Pronosticos": pronosticos}
-        st.download_button("📥 Descargar JSON", json.dumps(resultado), f"Quiniela_{nombre}.json")
-        st.success("¡Datos listos! Usa Ctrl+P en tu teclado para imprimir o guardar en PDF.")
-    else:
-        st.error("Por favor, ingresa un nombre para guardar.")
+c1, c2 = st.columns(2)
+with c1:
+    if st.button("💾 GUARDAR JSON"):
+        if nombre:
+            data_final = {"participante": nombre, "pronosticos": pronosticos}
+            st.download_button("📥 Descargar JSON", json.dumps(data_final), file_name=f"Quiniela_{nombre.replace(' ', '_')}.json")
+with c2:
+    if st.button("📄 GENERAR PDF"):
+        if nombre:
+            pdf_bytes = generar_pdf(nombre, pronosticos)
+            st.download_button("📥 Descargar PDF", pdf_bytes, file_name=f"Quiniela_{nombre.replace(' ', '_')}.pdf", mime="application/pdf")
+        else:
+            st.error("¡Ingresa tu nombre primero!")
