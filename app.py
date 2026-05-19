@@ -80,16 +80,23 @@ pronosticos = {}
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            cols = st.columns([1, 2, 2.5, 1.2, 0.6, 1.2, 2.5])
-            cols[0].markdown(f"P{juego[0]}")
-            cols[1].markdown(f"*{juego[1]}*")
-            cols[2].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
-            with cols[3]:
+            # FUSIÓN QUIRÚRGICA: Definición segura para la nube
+            c1, c2, c3, c4, c5, c6, c7 = st.columns([1, 2, 2.5, 1.2, 0.6, 1.2, 2.5])
+            
+            c1.markdown(f"P{juego[0]}")
+            c2.markdown(f"*{juego[1]}*")
+            c3.markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
+            
+            with c4:
                 loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
-            cols[4].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
-            with cols[5]:
+            
+            c5.markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
+            
+            with c6:
                 vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
-            cols[6].markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
+            
+            c7.markdown(f'<div class="team-visitante">{juego[3]}</div>', unsafe_html=True)
+            
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
  
 st.write("---")
