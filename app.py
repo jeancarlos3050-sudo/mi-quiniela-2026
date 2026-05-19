@@ -2,78 +2,84 @@ import streamlit as st
 import json
 from fpdf import FPDF
 
-# Configuración base intacta
+# Configuración base del sistema
 st.set_page_config(page_title="Quiniela Mundial 2026", layout="centered")
 
-# CSS QUIRÚRGICO: Ajuste de alineación vertical y posición del VS
+# CSS Avanzado para fijar la estructura horizontal exacta de la imagen guía
 st.markdown("""
     <style>
     .stApp {background-color: #0b132b; color: white;}
     
-    /* Forzar color blanco en el texto del input de nombre */
+    /* Input de nombre con contraste académico */
     .stTextInput input {color: white !important; background-color: #1c2541 !important;}
     
-    /* MODIFICACIÓN: Contenedor unificado para alineación vertical perfecta */
-    .partido-completo {
+    /* Contenedor maestro de la fila del partido: Forzado horizontal */
+    .fila-partido-absoluta {
         display: flex;
-        align-items: center; /* Centrado vertical absoluto */
+        flex-direction: row;
+        align-items: center; /* Alineación vertical perfecta en el eje medio */
         justify-content: center;
-        gap: 10px; /* Separación horizontal entre elementos */
         width: 100%;
+        padding: 4px 0;
     }
     
-    /* Bloque central que une las dos casillas con el VS abajo */
-    .bloque-marcador-vs {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-width: 160px; /* Espacio fijo para el marcador */
-    }
-    
-    /* Fila superior para los inputs numéricos */
-    .fila-inputs {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        gap: 15px; /* Separación entre cajas */
-    }
-    
-    /* AJUSTE: El "vs" en el centro exacto, pero más arriba */
-    .vs-centro-ajustado {
-        color: #ffbc42;
-        font-weight: bold;
-        text-align: center;
-        margin-top: 3px; /* MODIFICADO: Subido un poco más arriba */
-        font-size: 14px;
-        line-height: 1; /* Evita espaciado extra */
-    }
-    
-    /* Forzar tamaño idéntico y centrado de números en las casillas */
-    div[data-testid="stNumberInput"] {
-        width: 70px !important;
-    }
-    div[data-testid="stNumberInput"] input {
-        text-align: center !important;
-        width: 70px !important;
-    }
-    
-    /* Nombres de los equipos: Alineados y con ancho fijo */
-    .nombre-equipo-local {
+    /* Equipo Local: Texto a la derecha con margen controlado */
+    .bloque-local-fijo {
         text-align: right;
         font-weight: bold;
         color: white;
-        width: 140px; /* Ancho fijo para consistencia visual */
-        white-space: nowrap; /* Evita saltos de línea */
+        flex: 1;
+        padding-right: 15px;
+        font-size: 15px;
     }
     
-    .nombre-equipo-visitante {
+    /* Contenedor unificado para Marcador - VS - Marcador */
+    .bloque-central-marcador {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 12px; /* Espaciado simétrico horizontal */
+        width: 220px; /* Ancho fijo para blindar la zona media */
+    }
+    
+    /* El "vs" amarillo centrado en la misma línea horizontal */
+    .vs-linea-perfecta {
+        color: #ffbc42;
+        font-weight: bold;
+        font-size: 15px;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1;
+        text-align: center;
+    }
+    
+    /* Equipo Visitante: Texto a la izquierda con margen controlado */
+    .bloque-visitante-fijo {
         text-align: left;
         font-weight: bold;
         color: white;
-        width: 140px; /* Ancho fijo para consistencia visual */
-        white-space: nowrap; /* Evita saltos de línea */
+        flex: 1;
+        padding-left: 15px;
+        font-size: 15px;
+    }
+    
+    /* Forzar diseño exacto de los cuadros numéricos de Streamlit */
+    div[data-testid="stNumberInput"] {
+        width: 65px !important;
+    }
+    div[data-testid="stNumberInput"] input {
+        text-align: center !important;
+        width: 65px !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-weight: bold;
+        border-radius: 4px !important;
+    }
+    
+    /* Ocultar etiquetas espurias de Streamlit para limpieza visual */
+    div[data-testid="stNumberInput"] label {
+        display: none !important;
     }
     
     h2 {color: #ffbc42 !important;}
@@ -83,7 +89,6 @@ st.markdown("""
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 nombre = st.text_input("Nombre Completo del Participante:")
 
-# [Calendario maestro mantenido idéntico con todos los grupos]
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
@@ -114,51 +119,35 @@ def generar_pdf(nombre_u, data_p):
 calendario = obtener_calendario()
 pronosticos = {}
 
-# Interfaz: Mantenemos la estructura de columnas original para la fecha y el partido
 for grupo, juegos in calendario.items():
     with st.expander(grupo):
         for juego in juegos:
-            cols = st.columns([2.5, 7.5]) # Fecha/Hora | Bloque del Partido
+            # Separamos la información de tiempo de la estructura del partido
+            cols = st.columns([2.5, 7.5])
             
-            # Datos del partido
-            cols[0].write(f"P{juego[0]} | {juego[1]}")
+            # Bloque izquierdo: Identificador y horario
+            cols[0].write(f"Partido {juego[0]} | {juego[1]}")
             
-            # Bloque de confrontación con la NUEVA ALINEACIÓN VERTICAL CORREGIDA
+            # Bloque derecho: El partido unificado en una sola línea horizontal indestructible
             with cols[1]:
-                # Contenedor principal flex para centrar todo verticalmente
-                st.markdown('<div class="partido-completo">', unsafe_allow_html=True)
+                # Apertura de la fila del partido e inyección del equipo local
+                st.markdown(f'<div class="fila-partido-absoluta"><div class="bloque-local-fijo">{juego[2]}</div><div class="bloque-central-marcador">', unsafe_allow_html=True)
                 
-                # Usamos st.columns internos para equilibrar los nombres y el marcador,
-                # pero los envolvemos en divs CSS para el centrado vertical.
-                sub_cols = st.columns([3, 4, 3])
+                # Renderizado de los inputs de Streamlit lado a lado con el VS en la misma línea
+                col_num1, col_vs, col_num2 = st.columns([1, 0.4, 1])
+                with col_num1:
+                    loc = st.number_input("L", min_value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
+                with col_vs:
+                    st.markdown('<p class="vs-linea-perfecta">vs</p>', unsafe_allow_html=True)
+                with col_num2:
+                    vis = st.number_input("V", min_value=0, step=1, key=f"v{juego[0]}", label_visibility="collapsed")
                 
-                # Nombre del equipo local
-                with sub_cols[0]:
-                    st.markdown(f"<div class='nombre-equipo-local'>{juego[2]}</div>", unsafe_allow_html=True)
-                
-                # Bloque central unificado para las cajas y el vs abajo (un poco más arriba)
-                with sub_cols[1]:
-                    st.markdown('<div class="bloque-marcador-vs"><div class="fila-inputs">', unsafe_allow_html=True)
-                    
-                    caja_izq, caja_der = st.columns(2)
-                    with caja_izq:
-                        loc = st.number_input("L", min_value=0, key=f"l{juego[0]}", label_visibility="collapsed")
-                    with caja_der:
-                        vis = st.number_input("V", min_value=0, key=f"v{juego[0]}", label_visibility="collapsed")
-                    
-                    # Colocamos el texto "vs" abajo, con el nuevo espaciado corregido
-                    st.markdown('</div><p class="vs-centro-ajustado">vs</p></div>', unsafe_allow_html=True)
-                
-                # Nombre del equipo visitante
-                with sub_cols[2]:
-                    st.markdown(f"<div class='nombre-equipo-visitante'>{juego[3]}</div>", unsafe_allow_html=True)
-                
-                # Cierre del contenedor flex principal
-                st.markdown('</div>', unsafe_allow_html=True)
+                # Inyección del equipo visitante y cierre definitivo del contenedor horizontal
+                st.markdown(f'</div><div class="bloque-visitante-fijo">{juego[3]}</div></div>', unsafe_allow_html=True)
             
             pronosticos[juego[0]] = {"local": loc, "visitante": vis}
 
-# Bloque final documental y de exportación intacto
+# Bloque final documental y de exportación
 c1, c2 = st.columns(2)
 with c1:
     if st.button("💾 GUARDAR JSON"):
