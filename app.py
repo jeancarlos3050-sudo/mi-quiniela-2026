@@ -23,17 +23,21 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Lógica de Limpieza Total
+# Lógica de Limpieza Corregida: Resetea valores sin eliminar las llaves
 def limpiar_todo():
     for key in st.session_state.keys():
-        del st.session_state[key]
+        if key.startswith('l') or key.startswith('v'):
+            st.session_state[key] = 0
+        if key == 'nombre_input':
+            st.session_state[key] = ""
     st.rerun()
 
 st.title("🏆 MUNDIAL 2026: PRONÓSTICOS")
 
-# AJUSTE: Etiqueta "Nombre del Participante:"
-nombre = st.text_input("Nombre del Participante:")
+# AJUSTE: Etiqueta "Nombre del Participante:" con key definido
+nombre = st.text_input("Nombre del Participante:", key="nombre_input")
 
+# ... (Calendario y funciones permanecen igual) ...
 def obtener_calendario():
     return {
         "GRUPO A": [("01", "11/06 13:00", "México", "Sudáfrica"), ("02", "11/06 20:00", "Corea del Sur", "Chequia"), ("03", "18/06 19:00", "México", "Corea del Sur"), ("04", "18/06 12:00", "Chequia", "Sudáfrica"), ("05", "24/06 22:00", "México", "Chequia"), ("06", "24/06 22:00", "Sudáfrica", "Corea del Sur")],
@@ -70,7 +74,6 @@ for grupo, juegos in calendario.items():
             cols = st.columns([2.5, 2.5, 1.2, 0.6, 1.2, 2.5])
             cols[0].markdown(f"P{juego[0]} | {juego[1]}")
             cols[1].markdown(f'<div class="team-local">{juego[2]}</div>', unsafe_html=True)
-            # Marcadores inician en 0
             with cols[2]:
                 loc = st.number_input("L", min_value=0, value=0, step=1, key=f"l{juego[0]}", label_visibility="collapsed")
             cols[3].markdown('<p class="vs-texto">vs</p>', unsafe_html=True)
